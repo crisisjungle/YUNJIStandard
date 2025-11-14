@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云基产品用户场景需求功能分析</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .user-card {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .user-card:hover {
+            transform: translateY(-10px) scale(1.05);
+        }
+
+        .user-sphere {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            box-shadow: 
+                20px 20px 60px #bebebe,
+                -20px -20px 60px #ffffff,
+                inset 5px 5px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-sphere::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .user-icon {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+            z-index: 2;
+        }
+
+        .user-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .user-subtitle {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+            z-index: 2;
+        }
+
+        /* 用户类型特定颜色 */
+        .user-card[data-user="生产人员"] .user-sphere {
+            background: linear-gradient(145deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .user-card[data-user="安装人员"] .user-sphere {
+            background: linear-gradient(145deg, #43e97b, #38f9d7);
+            color: white;
+        }
+
+        .user-card[data-user="现场调试人员"] .user-sphere {
+            background: linear-gradient(145deg, #fa709a, #fee140);
+            color: white;
+        }
+
+        .user-card[data-user="客户运维人员"] .user-sphere {
+            background: linear-gradient(145deg, #a8edea, #fed6e3);
+            color: #333;
+        }
+
+        .user-card[data-user="客户管理人员"] .user-sphere {
+            background: linear-gradient(145deg, #ff9a9e, #fecfef);
+            color: white;
+        }
+
+        .user-card[data-user="售后维护人员"] .user-sphere {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        /* 弹出层 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            width: 95%;
+            max-width: 1400px;
+            max-height: 90vh;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal.active .modal-content {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 2.2rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .modal-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .modal-body {
+            padding: 40px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .scenario-section {
+            margin-bottom: 40px;
+        }
+
+        .scenario-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .scenario-description {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .requirement-section {
+            margin-bottom: 25px;
+        }
+
+        .requirement-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .requirement-content {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 6px;
+            color: #1976d2;
+            font-size: 0.95rem;
+        }
+
+        .function-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .function-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .function-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .function-module {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .function-item {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 3px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .user-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 20px;
+            }
+            
+            .user-card {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .user-icon {
+                font-size: 2.5rem;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 入场动画 */
+        .user-card {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .user-card:nth-child(1) { animation-delay: 0.1s; }
+        .user-card:nth-child(2) { animation-delay: 0.2s; }
+        .user-card:nth-child(3) { animation-delay: 0.3s; }
+        .user-card:nth-child(4) { animation-delay: 0.4s; }
+        .user-card:nth-child(5) { animation-delay: 0.5s; }
+        .user-card:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>云基产品用户场景分析</h1>
+            <p>点击用户类型卡片，深入了解不同用户的使用场景、核心需求和功能模块</p>
+        </div>
+
+        <div class="user-grid" id="userGrid">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹出层 -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle"></div>
+                <div class="modal-subtitle" id="modalSubtitle"></div>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 基于Excel表格的用户类型配置
+        const userTypes = {
+            '生产人员': {
+                icon: '🏭',
+                title: '生产人员',
+                subtitle: '产品制造人员',
+                description: '负责产品生产制造和组态制作'
+            },
+            '安装人员': {
+                icon: '🔧',
+                title: '安装人员',
+                subtitle: '设备安装工程师',
+                description: '负责硬件设备安装和系统部署'
+            },
+            '现场调试人员': {
+                icon: '⚙️',
+                title: '现场调试人员',
+                subtitle: '系统调试工程师',
+                description: '负责系统调试、设备接入和功能测试'
+            },
+            '客户运维人员': {
+                icon: '👥',
+                title: '客户运维人员',
+                subtitle: '运维监控人员',
+                description: '负责日常监控、巡检和系统维护'
+            },
+            '客户管理人员': {
+                icon: '👔',
+                title: '客户管理人员',
+                subtitle: '系统管理员',
+                description: '负责系统管理、用户配置和权限设置'
+            },
+            '售后维护人员': {
+                icon: '🛠️',
+                title: '售后维护人员',
+                subtitle: '技术支持工程师',
+                description: '负责售后支持、故障排查和技术服务'
+            }
+        };
+
+        // 基于Excel表格的详细数据
+        const userScenarioData = {
+            '生产人员': [
+                {
+                    scenario: '组态制作',
+                    requirement: '快速创建标准化组态界面模板',
+                    modules: ['工程组态管理'],
+                    functions: ['工程组态', '页面组态', '设备组态', '图元管理', '模板管理']
+                }
+            ],
+            '安装人员': [
+                {
+                    scenario: '机柜生产安装',
+                    requirement: '确保硬件设备安装质量合规',
+                    modules: ['设备接入管理', '平台基础服务'],
+                    functions: ['设备接入', '系统维护', '数据管理']
+                },
+                {
+                    scenario: '设备接入调试',
+                    requirement: '设置有效的联动控制策略',
+                    modules: ['自动化控制'],
+                    functions: ['联动控制', '实时数据采集', '计算和策略运算']
+                }
+            ],
+            '现场调试人员': [
+                {
+                    scenario: '系统集成验收',
+                    requirement: '确保界面功能完整可用',
+                    modules: ['监控展示服务'],
+                    functions: ['浏览器', '分层分级页面展示', '设备页面标准化展示']
+                },
+                {
+                    scenario: '界面功能测试',
+                    requirement: '验证系统功能正常运行',
+                    modules: ['告警通知管理'],
+                    functions: ['告警过滤', '告警受理', '告警确认']
+                }
+            ],
+            '客户运维人员': [
+                {
+                    scenario: '日常监控巡检',
+                    requirement: '实时监控系统整体运行状态',
+                    modules: ['监控展示服务', '告警通知管理'],
+                    functions: ['数据展示', '实时数据曲线', '远程控制设备', '接收实时告警推送']
+                },
+                {
+                    scenario: '报表数据查询',
+                    requirement: '获取系统运行数据和分析报告',
+                    modules: ['资产信息管理'],
+                    functions: ['资产信息总览', '运维宝APP']
+                }
+            ],
+            '客户管理人员': [
+                {
+                    scenario: '系统配置管理',
+                    requirement: '配置系统参数和用户权限',
+                    modules: ['平台基础服务', '用户权限管理'],
+                    functions: ['用户管理', '角色管理', '权限配置', '系统设置']
+                }
+            ],
+            '售后维护人员': [
+                {
+                    scenario: '故障排查处理',
+                    requirement: '快速定位和解决系统故障',
+                    modules: ['系统维护', '告警通知管理'],
+                    functions: ['系统诊断', '故障分析', '远程维护', '技术支持']
+                },
+                {
+                    scenario: '系统升级维护',
+                    requirement: '确保系统稳定运行和功能更新',
+                    modules: ['系统维护'],
+                    functions: ['系统升级', '补丁管理', '性能优化']
+                }
+            ]
+        };
+
+        // 渲染用户卡片
+        function renderUserCards() {
+            const userGrid = document.getElementById('userGrid');
+            userGrid.innerHTML = '';
+
+            Object.keys(userTypes).forEach(userType => {
+                const userConfig = userTypes[userType];
+                const userScenarios = userScenarioData[userType] || [];
+                
+                const card = document.createElement('div');
+                card.className = 'user-card';
+                card.setAttribute('data-user', userType);
+                card.onclick = () => openModal(userType);
+                
+                card.innerHTML = `
+                    <div class="user-sphere">
+                        <div class="user-icon">${userConfig.icon}</div>
+                        <div class="user-title">${userConfig.title}</div>
+                        <div class="user-subtitle">${userConfig.subtitle}</div>
+                    </div>
+                `;
+                
+                userGrid.appendChild(card);
+            });
+        }
+
+        // 打开弹出层
+        function openModal(userType) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSubtitle = document.getElementById('modalSubtitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            const userConfig = userTypes[userType];
+            const userScenarios = userScenarioData[userType] || [];
+            
+            modalTitle.textContent = userConfig.title;
+            modalSubtitle.textContent = userConfig.description;
+            
+            // 生成统计数据
+            const stats = generateStats(userScenarios);
+            
+            modalBody.innerHTML = `
+                <div class="stats-section">
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.scenarios}</div>
+                        <div class="stat-label">使用场景</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.modules}</div>
+                        <div class="stat-label">功能模块</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${stats.functions}</div>
+                        <div class="stat-label">具体功能</div>
+                    </div>
+                </div>
+                
+                ${userScenarios.map((scenario, index) => `
+                    <div class="scenario-section">
+                        <div class="scenario-title">使用场景 ${index + 1}: ${scenario.scenario}</div>
+                        <div class="scenario-description">
+                            <strong>场景描述：</strong>${scenario.scenario}
+                        </div>
+                        
+                        <div class="requirement-section">
+                            <div class="requirement-title">核心需求</div>
+                            <div class="requirement-content">${scenario.requirement}</div>
+                        </div>
+                        
+                        <div class="requirement-section">
+                            <div class="requirement-title">涉及功能模块</div>
+                            <div class="function-grid">
+                                ${scenario.modules.map(module => `
+                                    <div class="function-card">
+                                        <div class="function-module">${module}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="requirement-section">
+                            <div class="requirement-title">具体功能</div>
+                            <div class="function-grid">
+                                ${scenario.functions.map(func => `
+                                    <div class="function-card">
+                                        <div class="function-item">${func}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+            
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        // 关闭弹出层
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 400);
+        }
+
+        // 生成统计数据
+        function generateStats(scenarios) {
+            const allModules = new Set();
+            const allFunctions = new Set();
+            
+            scenarios.forEach(scenario => {
+                scenario.modules.forEach(module => allModules.add(module));
+                scenario.functions.forEach(func => allFunctions.add(func));
+            });
+            
+            return {
+                scenarios: scenarios.length,
+                modules: allModules.size,
+                functions: allFunctions.size
+            };
+        }
+
+        // 点击外部关闭弹出层
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // ESC键关闭弹出层
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderUserCards();
+        });
+    </script>
+</body>
+</html>

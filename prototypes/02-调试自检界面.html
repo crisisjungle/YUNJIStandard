@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试自检 - 云基动环监控系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: "⚡";
+            font-size: 26px;
+        }
+
+        .page-title {
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0.95;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 14px;
+        }
+
+        .header-link {
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            font-size: 14px;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .header-link:hover {
+            background: rgba(255, 255, 255, 0.28);
+            transform: translateY(-1px);
+        }
+
+        /* 主容器 */
+        .main-container {
+            height: calc(1080px - 60px - 70px);
+            display: flex;
+            flex-direction: column;
+            padding: 15px 20px;
+            gap: 15px;
+        }
+
+        /* 顶部进度点区域 */
+        .progress-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            height: 120px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .progress-stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .progress-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-stat-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .progress-stat-value.success {
+            color: #198754;
+        }
+
+        .progress-stat-value.warning {
+            color: #ffc107;
+        }
+
+        .progress-stat-value.error {
+            color: #dc3545;
+        }
+
+        /* 检测点指示器 */
+        .progress-dots {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e9ecef;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .progress-line-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+            border-radius: 2px;
+        }
+
+        .progress-dot {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e9ecef;
+            border: 3px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #7f8c8d;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .progress-dot:hover {
+            transform: scale(1.1);
+        }
+
+        .progress-dot.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(102, 126, 234, 0.6);
+            }
+        }
+
+        .progress-dot.completed {
+            background: #198754;
+            border-color: #198754;
+            color: white;
+        }
+
+        .progress-dot.completed::after {
+            content: "✓";
+            font-size: 20px;
+        }
+
+        .progress-dot.error {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .progress-dot.error::after {
+            content: "✗";
+            font-size: 20px;
+        }
+
+        .progress-dot-label {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #7f8c8d;
+            white-space: nowrap;
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-dot.active .progress-dot-label,
+        .progress-dot.completed .progress-dot-label,
+        .progress-dot.error .progress-dot-label {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* 主要内容区域 */
+        .content-area {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        /* 左侧：检测项列表 */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        /* 检测项列表面板 */
+        .detection-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .panel-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .panel-header h2 {
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        .btn-secondary:hover {
+            background: #d5dbdb;
+        }
+
+        .detection-list {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .detection-item {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            min-height: 180px;
+            position: relative;
+        }
+
+        .detection-item:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .detection-item.active {
+            border-color: #667eea;
+            background: #f0f4ff;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .detection-item.running {
+            border-color: #0d6efd;
+            background: #e7f1ff;
+        }
+
+        .detection-item.error {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .detection-item.success {
+            border-color: #198754;
+            background: #f0f9f4;
+        }
+
+        .detection-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .detection-item-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.4;
+            flex: 1;
+            padding-right: 10px;
+        }
+
+        .detection-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            position: absolute;
+            top: 0;
+            right: 0;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-running {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-success {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .detection-item-progress {
+            margin-top: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #7f8c8d;
+            min-width: 45px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        /* 卡片内的子检测项 */
+        .detection-item-sub-items {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 8px;
+            padding-top: 10px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .detection-item-sub-item {
+            padding: 6px 8px;
+            background: white;
+            border-radius: 4px;
+            border-left: 2px solid #e9ecef;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .detection-item-sub-item.running {
+            border-left-color: #0d6efd;
+            background: #e7f1ff;
+            font-weight: 500;
+        }
+
+        .detection-item-sub-item.success {
+            border-left-color: #198754;
+            background: #d1e7dd;
+        }
+
+        .detection-item-sub-item.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+            cursor: pointer;
+        }
+
+        .detection-item-sub-item.error:hover {
+            background: #f1aeb5;
+        }
+
+        .detection-item-sub-item-name {
+            flex: 1;
+            color: #2c3e50;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .detection-item-sub-item-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
+
+        /* 右侧：详情和子检测项 */
+        .detail-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        .detail-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .detail-card-header {
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            flex-shrink: 0;
+        }
+
+        .detail-card-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .detail-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        /* 子检测项列表 */
+        .sub-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sub-item {
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #e9ecef;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .sub-item.running {
+            border-left-color: #0d6efd;
+            background: #e7f1ff;
+            font-weight: 600;
+            animation: pulse-sub 1.5s infinite;
+        }
+
+        @keyframes pulse-sub {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .sub-item.success {
+            border-left-color: #198754;
+            background: #d1e7dd;
+        }
+
+        .sub-item.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+            cursor: pointer;
+        }
+
+        .sub-item.error:hover {
+            background: #f1aeb5;
+        }
+
+        .sub-item-name {
+            flex: 1;
+            color: #2c3e50;
+        }
+
+        .sub-item-status {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        /* 失败原因弹窗 */
+        .error-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-modal.show {
+            display: flex;
+        }
+
+        .error-modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .error-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #dc3545;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-modal-close {
+            font-size: 24px;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .error-modal-close:hover {
+            color: #2c3e50;
+            transform: rotate(90deg);
+        }
+
+        .error-modal-body {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #2c3e50;
+        }
+
+        .error-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #fff5f5;
+            border-radius: 6px;
+            border-left: 3px solid #dc3545;
+        }
+
+        .error-item-name {
+            font-weight: 600;
+            color: #842029;
+            margin-bottom: 8px;
+        }
+
+        .error-item-reason {
+            color: #2c3e50;
+        }
+
+        /* 检测日志 */
+        .log-container {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .log-entry {
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .log-time {
+            color: #95a5a6;
+            min-width: 70px;
+            font-size: 11px;
+        }
+
+        .log-level {
+            min-width: 45px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .log-level.info {
+            color: #0d6efd;
+        }
+
+        .log-level.success {
+            color: #198754;
+        }
+
+        .log-level.warning {
+            color: #ffc107;
+        }
+
+        .log-level.error {
+            color: #dc3545;
+        }
+
+        .log-message {
+            flex: 1;
+            color: #2c3e50;
+        }
+
+        /* 底部操作栏 */
+        .action-bar {
+            height: 70px;
+            background: white;
+            padding: 15px 25px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-info {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-large {
+            padding: 10px 24px;
+            font-size: 14px;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">云基动环监控系统</div>
+            <div class="page-title">调试自检</div>
+        </div>
+        <div class="header-right">
+            <a class="header-link" href="03-动环监控软件界面.html">进入监控平台</a>
+            <div class="user-info">
+                <span>👤</span>
+                <span>管理员</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 顶部进度点区域 -->
+        <div class="progress-section">
+            <div class="progress-header">
+                <div class="progress-title">检测进度</div>
+                <div class="progress-stats">
+                    <div class="progress-stat-item">
+                        <span>总检测项:</span>
+                        <span class="progress-stat-value" id="totalCount">10</span>
+                    </div>
+                    <div class="progress-stat-item">
+                        <span>已完成:</span>
+                        <span class="progress-stat-value success" id="successCount">0</span>
+                    </div>
+                    <div class="progress-stat-item">
+                        <span>进行中:</span>
+                        <span class="progress-stat-value warning" id="runningCount">0</span>
+                    </div>
+                    <div class="progress-stat-item">
+                        <span>失败项:</span>
+                        <span class="progress-stat-value error" id="errorCount">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-dots" id="progressDots">
+                <div class="progress-line">
+                    <div class="progress-line-fill" id="progressLineFill"></div>
+                </div>
+                <!-- 检测点将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="content-area">
+            <!-- 左侧：检测项列表 -->
+            <div class="left-panel">
+                <!-- 检测项列表面板 -->
+                <div class="detection-panel">
+                    <div class="panel-header">
+                        <h2>检测项目列表（点击查看子检测项）</h2>
+                        <div class="panel-actions">
+                            <button class="btn btn-secondary" onclick="stopDetection()">停止检测</button>
+                            <button class="btn btn-primary" onclick="startDetection()">开始检测</button>
+                        </div>
+                    </div>
+                    <div class="detection-list" id="detectionList">
+                        <!-- 检测项目将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：详情和子检测项 -->
+            <div class="detail-panel">
+                <!-- 检测详情 -->
+                <div class="detail-card">
+                    <div class="detail-card-header">检测详情</div>
+                    <div class="detail-card-body">
+                        <div class="detail-info" id="detailInfo">
+                            <div class="info-row">
+                                <span class="info-label">检测项目</span>
+                                <span class="info-value">-</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">检测结果</span>
+                                <span class="info-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 子检测项列表 -->
+                <div class="detail-card" style="flex: 1;">
+                    <div class="detail-card-header">子检测项</div>
+                    <div class="detail-card-body">
+                        <div class="sub-items-list" id="subItemsList">
+                            <div style="text-align: center; padding: 40px; color: #7f8c8d; font-size: 14px;">
+                                请选择一个检测项目查看子检测项
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 检测日志 -->
+                <div class="detail-card" style="flex: 1;">
+                    <div class="detail-card-header">检测日志</div>
+                    <div class="detail-card-body">
+                        <div class="log-container" id="logContainer">
+                            <div class="log-entry">
+                                <span class="log-time">--:--:--</span>
+                                <span class="log-level info">[INFO]</span>
+                                <span class="log-message">等待开始检测...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 失败原因弹窗 -->
+    <div class="error-modal" id="errorModal">
+        <div class="error-modal-content">
+            <div class="error-modal-header">
+                <div class="error-modal-title">
+                    <span>⚠️</span>
+                    <span>失败原因详情</span>
+                </div>
+                <div class="error-modal-close" onclick="closeErrorModal()">×</div>
+            </div>
+            <div class="error-modal-body" id="errorModalBody">
+                <!-- 失败原因内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="action-bar">
+        <div class="action-info">
+            <span>整体进度: <strong id="progressPercent">0/10</strong></span>
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-secondary btn-large" onclick="exportReport()">导出报告</button>
+            <button class="btn btn-primary btn-large" onclick="goToMonitor()">进入监控</button>
+        </div>
+    </div>
+
+    <script>
+        // 检测项目数据（包含子检测项）
+        const detectionItems = [
+            {
+                id: 1,
+                name: "系统初始化检测",
+                desc: "检测系统基础服务是否正常启动",
+                category: "system",
+                subItems: [
+                    { id: '1-1', name: '检查系统服务状态' },
+                    { id: '1-2', name: '验证配置文件完整性' },
+                    { id: '1-3', name: '检查系统资源占用' },
+                    { id: '1-4', name: '验证系统日志功能' }
+                ]
+            },
+            {
+                id: 2,
+                name: "网络连接检测",
+                desc: "检测网络接口和连接状态",
+                category: "network",
+                subItems: [
+                    { id: '2-1', name: '检查网络接口状态' },
+                    { id: '2-2', name: '测试网络连通性' },
+                    { id: '2-3', name: '验证DNS解析' },
+                    { id: '2-4', name: '检查网络带宽' }
+                ]
+            },
+            {
+                id: 3,
+                name: "数据库连接检测",
+                desc: "检测数据库服务连接和表结构",
+                category: "database",
+                subItems: [
+                    { id: '3-1', name: '检查数据库连接' },
+                    { id: '3-2', name: '验证表结构完整性' },
+                    { id: '3-3', name: '测试数据库读写性能' },
+                    { id: '3-4', name: '检查数据库备份状态' }
+                ]
+            },
+            {
+                id: 4,
+                name: "设备通信检测",
+                desc: "检测与监控设备的通信连接",
+                category: "device",
+                subItems: [
+                    { id: '4-1', name: '扫描设备连接' },
+                    { id: '4-2', name: '测试设备通信协议' },
+                    { id: '4-3', name: '验证设备响应时间' },
+                    { id: '4-4', name: '检查设备数据采集' }
+                ]
+            },
+            {
+                id: 5,
+                name: "数据采集检测",
+                desc: "检测数据采集模块是否正常工作",
+                category: "data",
+                subItems: [
+                    { id: '5-1', name: '检查采集任务状态' },
+                    { id: '5-2', name: '验证数据采集频率' },
+                    { id: '5-3', name: '测试数据存储功能' },
+                    { id: '5-4', name: '检查数据完整性' }
+                ]
+            },
+            {
+                id: 6,
+                name: "告警服务检测",
+                desc: "检测告警服务是否正常运行",
+                category: "alarm",
+                subItems: [
+                    { id: '6-1', name: '检查告警服务状态' },
+                    { id: '6-2', name: '测试告警触发机制' },
+                    { id: '6-3', name: '验证告警通知功能' },
+                    { id: '6-4', name: '检查告警历史记录' }
+                ]
+            },
+            {
+                id: 7,
+                name: "联动控制检测",
+                desc: "检测联动控制功能是否正常",
+                category: "control",
+                subItems: [
+                    { id: '7-1', name: '检查联动规则配置' },
+                    { id: '7-2', name: '测试联动触发条件' },
+                    { id: '7-3', name: '验证联动执行结果' },
+                    { id: '7-4', name: '检查联动日志记录' }
+                ]
+            },
+            {
+                id: 8,
+                name: "用户权限检测",
+                desc: "检测用户权限配置是否正确",
+                category: "security",
+                subItems: [
+                    { id: '8-1', name: '检查用户账户状态' },
+                    { id: '8-2', name: '验证权限分配规则' },
+                    { id: '8-3', name: '测试权限验证机制' },
+                    { id: '8-4', name: '检查安全日志记录' }
+                ]
+            },
+            {
+                id: 9,
+                name: "存储空间检测",
+                desc: "检测系统存储空间是否充足",
+                category: "storage",
+                subItems: [
+                    { id: '9-1', name: '检查磁盘使用率' },
+                    { id: '9-2', name: '验证存储空间分配' },
+                    { id: '9-3', name: '测试数据写入速度' },
+                    { id: '9-4', name: '检查存储健康状态' }
+                ]
+            },
+            {
+                id: 10,
+                name: "性能指标检测",
+                desc: "检测系统CPU、内存等性能指标",
+                category: "performance",
+                subItems: [
+                    { id: '10-1', name: '检查CPU使用率' },
+                    { id: '10-2', name: '检查内存使用率' },
+                    { id: '10-3', name: '测试系统响应时间' },
+                    { id: '10-4', name: '检查系统负载均衡' }
+                ]
+            }
+        ];
+
+        let currentDetection = null;
+        let detectionStatus = {};
+        let subItemStatus = {};
+        let subItemErrors = {}; // 存储子检测项的失败原因
+        let isRunning = false;
+        let logs = [];
+
+        // 初始化
+        function init() {
+            detectionItems.forEach(item => {
+                detectionStatus[item.id] = {
+                    status: 'pending',
+                    progress: 0,
+                    startTime: null,
+                    endTime: null,
+                    result: null
+                };
+                // 初始化子检测项状态
+                if (item.subItems) {
+                    item.subItems.forEach(subItem => {
+                        subItemStatus[subItem.id] = {
+                            status: 'pending'
+                        };
+                        subItemErrors[subItem.id] = null;
+                    });
+                }
+            });
+            renderProgressDots();
+            renderDetectionList();
+            updateProgress();
+            addLog('info', '系统调试自检模块已就绪');
+        }
+
+        // 渲染进度点
+        function renderProgressDots() {
+            const container = document.getElementById('progressDots');
+            container.innerHTML = `
+                <div class="progress-line">
+                    <div class="progress-line-fill" id="progressLineFill"></div>
+                </div>
+                ${detectionItems.map((item, index) => `
+                    <div class="progress-dot" data-id="${item.id}" onclick="selectDetection(${item.id})">
+                        ${index + 1}
+                        <div class="progress-dot-label">${item.name}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // 更新进度点状态
+        function updateProgressDots() {
+            detectionItems.forEach((item, index) => {
+                const dot = document.querySelector(`.progress-dot[data-id="${item.id}"]`);
+                if (!dot) return;
+
+                const status = detectionStatus[item.id].status;
+                dot.className = 'progress-dot';
+                
+                if (status === 'running') {
+                    dot.classList.add('active');
+                } else if (status === 'success') {
+                    dot.classList.add('completed');
+                } else if (status === 'error') {
+                    dot.classList.add('error');
+                }
+
+                // 更新进度线
+                const completedCount = detectionItems.filter(i => 
+                    detectionStatus[i.id].status === 'success' || detectionStatus[i.id].status === 'error'
+                ).length;
+                const progress = completedCount / detectionItems.length * 100;
+                document.getElementById('progressLineFill').style.width = progress + '%';
+            });
+        }
+
+        // 渲染检测列表
+        function renderDetectionList() {
+            const list = document.getElementById('detectionList');
+            list.innerHTML = detectionItems.map(item => {
+                const status = detectionStatus[item.id];
+                const statusClass = `status-${status.status}`;
+                const statusText = {
+                    'pending': '待检测',
+                    'running': '检测中',
+                    'success': '通过',
+                    'error': '失败'
+                }[status.status];
+
+                const itemClass = [
+                    currentDetection?.id === item.id ? 'active' : '',
+                    status.status === 'running' ? 'running' : '',
+                    status.status === 'error' ? 'error' : '',
+                    status.status === 'success' ? 'success' : ''
+                ].filter(Boolean).join(' ');
+
+                // 渲染子检测项
+                let subItemsHtml = '';
+                if (item.subItems && item.subItems.length > 0) {
+                    const subItems = item.subItems.map(subItem => {
+                        const subStatus = subItemStatus[subItem.id];
+                        const subStatusClass = subStatus.status === 'running' ? 'running' : 
+                                              subStatus.status === 'success' ? 'success' : 
+                                              subStatus.status === 'error' ? 'error' : '';
+                        const subStatusText = {
+                            'pending': '待检测',
+                            'running': '检测中',
+                            'success': '通过',
+                            'error': '失败'
+                        }[subStatus.status] || '待检测';
+
+                        const errorClick = subStatus.status === 'error' && subItemErrors[subItem.id] 
+                            ? `onclick="event.stopPropagation(); showErrorReason('${item.name}', '${subItem.name}', '${subItemErrors[subItem.id]}')"`
+                            : '';
+
+                        return `
+                            <div class="detection-item-sub-item ${subStatusClass}" ${errorClick}>
+                                <span class="detection-item-sub-item-name">${subItem.name}</span>
+                                <span class="detection-item-sub-item-status ${subStatusClass}">${subStatusText}</span>
+                            </div>
+                        `;
+                    }).join('');
+
+                    subItemsHtml = `
+                        <div class="detection-item-sub-items">
+                            ${subItems}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="detection-item ${itemClass}" 
+                         onclick="selectDetection(${item.id})">
+                        <div class="detection-item-header">
+                            <div class="detection-item-name">
+                                <span>${getCategoryIcon(item.category)}</span>
+                                <span>${item.name}</span>
+                            </div>
+                            <div class="detection-status ${statusClass}">${statusText}</div>
+                        </div>
+                        ${subItemsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 获取分类图标
+        function getCategoryIcon(category) {
+            const icons = {
+                'system': '🖥️',
+                'network': '🌐',
+                'database': '💾',
+                'device': '📡',
+                'data': '📊',
+                'alarm': '🚨',
+                'control': '🎛️',
+                'security': '🔒',
+                'storage': '💿',
+                'performance': '⚡'
+            };
+            return icons[category] || '📋';
+        }
+
+        // 选择检测项
+        function selectDetection(id) {
+            const item = detectionItems.find(i => i.id === id);
+            if (!item) return;
+
+            currentDetection = item;
+            renderDetectionList();
+            updateProgressDots();
+            updateDetailInfo(item);
+            renderSubItems(item);
+        }
+
+        // 渲染子检测项
+        function renderSubItems(item) {
+            const list = document.getElementById('subItemsList');
+            
+            if (!item.subItems || item.subItems.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 40px; color: #7f8c8d; font-size: 14px;">该检测项没有子检测项</div>';
+                return;
+            }
+
+            list.innerHTML = item.subItems.map(subItem => {
+                const subStatus = subItemStatus[subItem.id];
+                const subStatusClass = subStatus.status === 'running' ? 'running' : 
+                                      subStatus.status === 'success' ? 'success' : 
+                                      subStatus.status === 'error' ? 'error' : '';
+                const subStatusText = {
+                    'pending': '待检测',
+                    'running': '检测中',
+                    'success': '通过',
+                    'error': '失败'
+                }[subStatus.status] || '待检测';
+
+                const errorClick = subStatus.status === 'error' && subItemErrors[subItem.id] 
+                    ? `onclick="showErrorReason('${item.name}', '${subItem.name}', '${subItemErrors[subItem.id]}')"`
+                    : '';
+
+                return `
+                    <div class="sub-item ${subStatusClass}" ${errorClick}>
+                        <span class="sub-item-name">${subItem.name}</span>
+                        <span class="sub-item-status ${subStatusClass}">${subStatusText}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 更新详情信息
+        function updateDetailInfo(item) {
+            const status = detectionStatus[item.id];
+            const detailInfo = document.getElementById('detailInfo');
+
+            detailInfo.innerHTML = `
+                <div class="info-row">
+                    <span class="info-label">检测项目</span>
+                    <span class="info-value">${item.name}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">检测结果</span>
+                    <span class="info-value">${status.result || '-'}</span>
+                </div>
+            `;
+        }
+
+        // 获取状态文本
+        function getStatusText(status) {
+            const texts = {
+                'pending': '待检测',
+                'running': '检测中',
+                'success': '通过',
+                'error': '失败'
+            };
+            return texts[status] || '未知';
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const stats = {
+                total: detectionItems.length,
+                success: 0,
+                running: 0,
+                error: 0
+            };
+
+            detectionItems.forEach(item => {
+                const status = detectionStatus[item.id].status;
+                if (status === 'success') stats.success++;
+                else if (status === 'running') stats.running++;
+                else if (status === 'error') stats.error++;
+            });
+
+            const completed = stats.success + stats.error;
+
+            document.getElementById('totalCount').textContent = stats.total;
+            document.getElementById('successCount').textContent = stats.success;
+            document.getElementById('runningCount').textContent = stats.running;
+            document.getElementById('errorCount').textContent = stats.error;
+            document.getElementById('progressPercent').textContent = `${completed}/${stats.total}`;
+        }
+
+        // 更新失败项列表（已删除，保留函数避免报错）
+        function updateFailedItems() {
+            // 失败项列表已删除
+        }
+
+        // 显示失败项的错误原因
+        function showFailedItemErrors(itemId) {
+            const item = detectionItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            const failedSubItems = item.subItems.filter(subItem => 
+                subItemStatus[subItem.id].status === 'error'
+            );
+
+            if (failedSubItems.length === 0) {
+                alert('该检测项没有失败的子检测项');
+                return;
+            }
+
+            const errorContent = failedSubItems.map(subItem => {
+                const reason = subItemErrors[subItem.id] || '未知错误';
+                return `
+                    <div class="error-item">
+                        <div class="error-item-name">${subItem.name}</div>
+                        <div class="error-item-reason">${reason}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('errorModalBody').innerHTML = `
+                <div style="margin-bottom: 15px; font-weight: 600; color: #2c3e50;">检测项: ${item.name}</div>
+                ${errorContent}
+            `;
+            document.getElementById('errorModal').classList.add('show');
+        }
+
+        // 显示子检测项的错误原因
+        function showErrorReason(itemName, subItemName, reason) {
+            document.getElementById('errorModalBody').innerHTML = `
+                <div class="error-item">
+                    <div class="error-item-name">检测项: ${itemName}</div>
+                    <div style="margin: 10px 0; font-weight: 600; color: #842029;">子检测项: ${subItemName}</div>
+                    <div class="error-item-reason">${reason}</div>
+                </div>
+            `;
+            document.getElementById('errorModal').classList.add('show');
+        }
+
+        // 关闭错误弹窗
+        function closeErrorModal() {
+            document.getElementById('errorModal').classList.remove('show');
+        }
+
+        // 点击弹窗外部关闭
+        document.getElementById('errorModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeErrorModal();
+            }
+        });
+
+        // 开始检测
+        async function startDetection() {
+            if (isRunning) {
+                alert('检测正在进行中，请等待完成');
+                return;
+            }
+
+            isRunning = true;
+            addLog('info', '开始系统调试自检...');
+            updateProgress();
+            updateProgressDots();
+
+            // 依次执行每个检测项
+            for (let i = 0; i < detectionItems.length; i++) {
+                const item = detectionItems[i];
+                await runDetection(item);
+            }
+
+            isRunning = false;
+            addLog('success', '所有检测项已完成');
+            updateProgress();
+            updateProgressDots();
+        }
+
+        // 执行单个检测
+        async function runDetection(item) {
+            const status = detectionStatus[item.id];
+            status.status = 'running';
+            status.startTime = Date.now();
+            status.progress = 0;
+
+            selectDetection(item.id);
+            addLog('info', `开始检测: ${item.name}`);
+            renderDetectionList();
+            updateProgress();
+            updateProgressDots();
+
+            // 如果有子检测项，依次执行
+            if (item.subItems && item.subItems.length > 0) {
+                const subItemCount = item.subItems.length;
+                for (let i = 0; i < item.subItems.length; i++) {
+                    const subItem = item.subItems[i];
+                    await runSubDetection(item.id, subItem, i, subItemCount);
+                }
+            } else {
+                // 没有子检测项，直接模拟检测过程
+                const steps = 10;
+                for (let i = 0; i <= steps; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    status.progress = (i / steps) * 100;
+                    renderDetectionList();
+                    updateProgress();
+                }
+            }
+
+            // 判断整体检测结果
+            let hasError = false;
+            if (item.subItems) {
+                hasError = item.subItems.some(subItem => subItemStatus[subItem.id].status === 'error');
+            }
+
+            status.status = hasError ? 'error' : 'success';
+            status.endTime = Date.now();
+            status.progress = 100;
+            status.result = hasError ? '检测失败，发现异常问题' : '检测通过，所有功能正常';
+
+            if (status.status === 'success') {
+                addLog('success', `${item.name}: 检测通过`);
+            } else {
+                addLog('error', `${item.name}: 检测失败`);
+            }
+
+            renderDetectionList();
+            updateDetailInfo(item);
+            updateProgress();
+            updateProgressDots();
+        }
+
+        // 执行子检测项
+        async function runSubDetection(parentId, subItem, index, total) {
+            const subStatus = subItemStatus[subItem.id];
+            subStatus.status = 'running';
+            
+            addLog('info', `  → ${subItem.name}`);
+            renderSubItems(detectionItems.find(i => i.id === parentId));
+
+            // 模拟子检测过程
+            const steps = 5;
+            for (let i = 0; i <= steps; i++) {
+                await new Promise(resolve => setTimeout(resolve, 150));
+                // 更新父项进度
+                const parentStatus = detectionStatus[parentId];
+                const baseProgress = (index / total) * 100;
+                const stepProgress = (i / steps) * (100 / total);
+                parentStatus.progress = Math.min(100, baseProgress + stepProgress);
+                renderDetectionList();
+                updateProgress();
+            }
+
+            // 随机决定成功或失败（85%成功率）
+            const success = Math.random() > 0.15;
+            subStatus.status = success ? 'success' : 'error';
+
+            // 如果失败，生成失败原因
+            if (!success) {
+                const reasons = [
+                    '连接超时，无法建立通信',
+                    '配置参数错误，请检查配置',
+                    '资源不足，系统负载过高',
+                    '权限验证失败，缺少必要权限',
+                    '数据格式不匹配，解析失败',
+                    '服务未启动，请检查服务状态'
+                ];
+                subItemErrors[subItem.id] = reasons[Math.floor(Math.random() * reasons.length)];
+            }
+
+            if (success) {
+                addLog('success', `  ✓ ${subItem.name}: 通过`);
+            } else {
+                addLog('error', `  ✗ ${subItem.name}: 失败 - ${subItemErrors[subItem.id]}`);
+            }
+
+            renderSubItems(detectionItems.find(i => i.id === parentId));
+        }
+
+        // 停止检测
+        function stopDetection() {
+            if (!isRunning) {
+                alert('当前没有正在进行的检测');
+                return;
+            }
+            isRunning = false;
+            addLog('warning', '检测已停止');
+        }
+
+        // 添加日志
+        function addLog(level, message) {
+            const time = new Date().toLocaleTimeString();
+            logs.push({ time, level, message });
+            
+            const logContainer = document.getElementById('logContainer');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-level ${level}">[${level.toUpperCase()}]</span>
+                <span class="log-message">${message}</span>
+            `;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            // 限制日志数量
+            if (logs.length > 50) {
+                logs.shift();
+                if (logContainer.firstChild) {
+                    logContainer.removeChild(logContainer.firstChild);
+                }
+            }
+        }
+
+        // 导出报告
+        function exportReport() {
+            alert('导出检测报告功能');
+        }
+
+        // 进入监控
+        function goToMonitor() {
+            if (isRunning) {
+                alert('请先完成或停止检测');
+                return;
+            }
+            alert('将跳转到监控界面...');
+        }
+
+        // 页面加载时初始化
+        init();
+    </script>
+</body>
+</html>

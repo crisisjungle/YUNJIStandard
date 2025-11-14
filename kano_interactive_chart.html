@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一体化机柜产品功能KANO模型分析图</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .control-group label {
+            font-weight: bold;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+        
+        .control-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        
+        .control-group input[type="file"] {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: #fff;
+        }
+        
+        .control-group small {
+            display: block;
+            color: #666;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            height: 700px;
+        }
+        
+        #kanoChart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .legend {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        .stats {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .feature-card {
+            line-height: 1.6;
+        }
+        
+        .feature-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .feature-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        
+        .feature-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .feature-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .coordinates {
+            margin-top: 15px;
+            padding: 10px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        /* 新增弹窗样式 */
+        .feature-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .feature-section h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .icon {
+            font-size: 18px;
+        }
+        
+        .space-tree {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .tree-node {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        .tree-node.level-1 {
+            margin-left: 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .tree-node.level-2 {
+            margin-left: 20px;
+            color: #34495e;
+        }
+        
+        .tree-node.level-3 {
+            margin-left: 40px;
+            color: #7f8c8d;
+        }
+        
+        .tree-node.active {
+            color: #3498db !important;
+            font-weight: bold;
+        }
+        
+        .tree-icon {
+            font-size: 16px;
+        }
+        
+        .info-grid {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .info-value {
+            color: #7f8c8d;
+        }
+        
+        .kano-explanation {
+            background: #e8f4fd;
+            padding: 12px;
+            border-radius: 6px;
+            color: #2c3e50;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .coord-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        
+        .coord-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .coord-value {
+            font-family: monospace;
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        /* 开关按钮样式 */
+        .control-group input[type="checkbox"] {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .control-group input[type="checkbox"]:checked {
+            background: #3498db;
+            border-color: #3498db;
+        }
+        
+        .control-group input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .control-group input[type="checkbox"]:hover {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        
+        /* 简化弹窗样式 */
+        .function-path {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .classification-info {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+        
+        .classification-info .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .classification-info .info-value {
+            color: #7f8c8d;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>一体化机柜产品功能KANO模型分析图</h1>
+            <p>交互式坐标图 - 点击功能点查看详情，支持按功能类型筛选和显示功能名称标签</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>功能类型筛选</label>
+                <select id="functionType" onchange="applyFilters()">
+                    <option value="">显示全部功能类型</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>显示模式</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
+                        <input type="checkbox" id="showLabels" onchange="toggleLabels()" style="transform: scale(1.2);">
+                        显示功能名称
+                    </label>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>筛选操作</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="resetFilters()" style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; background: #f8f9fa; cursor: pointer; font-size: 14px;">
+                        清除筛选
+                    </button>
+                    <span id="filterStatus" style="font-size: 12px; color: #666;"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div id="kanoChart"></div>
+        </div>
+        
+        <div class="legend">
+            <h3>KANO模型图例</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #C62828;"></div>
+                    <span>基本型需求</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2E7D32;"></div>
+                    <span>期望型需求</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #1565C0;"></div>
+                    <span>魅力型需求</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #757575;"></div>
+                    <span>无差异需求</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #6A1B9A;"></div>
+                    <span>反向型需求</span>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 20px;">功能类型分布</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3498DB;"></div>
+                    <span>动环面客</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #E74C3C;"></div>
+                    <span>售后维护</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #F39C12;"></div>
+                    <span>用户配置</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #27AE60;"></div>
+                    <span>工程施工</span>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 20px;">标准KANO模型理论曲线</h3>
+            <div style="font-size: 12px; line-height: 1.6; color: #555;">
+                <div style="margin-bottom: 10px;">
+                    <strong>坐标系：</strong>横轴 x：功能实现度 [0,1]，纵轴 y：用户满意度 [-1,1]
+                </div>
+                <div class="legend-items" style="flex-direction: column; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 20px; height: 3px; background: #2E7D32;"></div>
+                        <span><strong>期望需求 (Performance):</strong> y = 2x - 1</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 20px; height: 3px; background: #1565C0;"></div>
+                        <span><strong>魅力需求 (Attractive):</strong> y = (e<sup>αx</sup> - 1) / (e<sup>α</sup> - 1) + 0.3</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 20px; height: 3px; background: #C62828;"></div>
+                        <span><strong>基本需求 (Must-be):</strong> y = -(e<sup>α(1-x)</sup> - 1) / (e<sup>α</sup> - 1) - 0.3</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 20px; height: 3px; background: #757575;"></div>
+                        <span><strong>无差异需求 (Indifferent):</strong> y ≡ 0</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 20px; height: 3px; background: #6A1B9A;"></div>
+                        <span><strong>反向需求 (Reverse):</strong> y = 1 - 2x</span>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; font-style: italic; color: #777;">
+                    当前参数 α = 3，控制魅力需求和基本需求曲线的弯曲程度
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <h3>数据统计</h3>
+            <div class="stats-grid" id="statsGrid">
+                <!-- 统计数据将动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 功能卡片模态框 -->
+    <div id="featureModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="featureCard" class="feature-card">
+                <!-- 卡片内容将动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let allData = [];
+        let filteredData = [];
+        let chart = null;
+        let showLabels = false; // 控制是否显示功能名称标签
+        
+        // KANO类型配色
+        const kanoColors = {
+            // 英文版本（兼容旧数据）
+            'Must-be': '#C62828',
+            'One-dimensional': '#2E7D32',
+            'Attractive': '#FF9800',
+            'Indifferent': '#757575',
+            'Reverse': '#000000',
+            // 中文版本（新数据格式）
+            '基本型需求': '#C62828',
+            '期望型需求': '#2E7D32',
+            '魅力型需求': '#FF9800', 
+            '无差异需求': '#757575',
+            '反向型需求': '#000000'
+        };
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initChart();
+            loadDefaultData();
+        });
+        
+        // 初始化图表
+        function initChart() {
+            const chartDom = document.getElementById('kanoChart');
+            chart = echarts.init(chartDom);
+            
+            const option = {
+                title: {
+                    text: '',
+                    left: 'center'
+                },
+                legend: {
+                    show: false
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        if (params.seriesType === 'scatter' && params.data && params.data.length >= 3) {
+                            const item = params.data[2]; // 完整数据对象在第三个位置
+                            return `
+                                <div style="max-width: 300px;">
+                                    <strong>${item.功能项}</strong><br/>
+                                    <strong>类型:</strong> ${item.KANO类型}<br/>
+                                    <strong>业务模块:</strong> ${item.业务模块}<br/>
+                                    <strong>功能模块:</strong> ${item.功能模块}<br/>
+                                    <em>点击查看完整描述</em>
+                                </div>
+                            `;
+                        }
+                        return '';
+                    }
+                },
+                // 添加零线标识
+                graphic: [
+                    // Y=0零线
+                    {
+                        type: 'line',
+                        shape: {
+                            x1: 0,
+                            y1: '50%',
+                            x2: '100%',
+                            y2: '50%'
+                        },
+                        style: {
+                            stroke: '#333',
+                            lineWidth: 1,
+                            lineDash: [5, 5]
+                        },
+                        z: 2
+                    }
+                ],
+                grid: {
+                    left: '10%',
+                    right: '5%',
+                    bottom: '12%',
+                    top: '5%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value',
+                    min: 0,
+                    max: 1,
+                    show: true,
+                    name: '功能实现度 (x)',
+                    nameLocation: 'middle',
+                    nameGap: 25,
+                    nameTextStyle: {
+                        fontSize: 14,
+                        fontWeight: 'bold',
+                        color: '#333'
+                    },
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#333',
+                            width: 2
+                        }
+                    },
+                    axisTick: {
+                        show: true,
+                        lineStyle: {
+                            color: '#333'
+                        }
+                    },
+                    axisLabel: {
+                        show: true,
+                        color: '#666',
+                        fontSize: 12,
+                        formatter: function(value) {
+                            return value.toFixed(1);
+                        }
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#e0e0e0',
+                            type: 'dashed',
+                            opacity: 0.5
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    min: -1,
+                    max: 1,
+                    show: true,
+                    name: '用户满意度 (y)',
+                    nameLocation: 'middle',
+                    nameGap: 35,
+                    nameTextStyle: {
+                        fontSize: 14,
+                        fontWeight: 'bold',
+                        color: '#333'
+                    },
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#333',
+                            width: 2
+                        }
+                    },
+                    axisTick: {
+                        show: true,
+                        lineStyle: {
+                            color: '#333'
+                        }
+                    },
+                    axisLabel: {
+                        show: true,
+                        color: '#666',
+                        fontSize: 12,
+                        formatter: function(value) {
+                            return value.toFixed(1);
+                        }
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color: '#e0e0e0',
+                            type: 'dashed',
+                            opacity: 0.5
+                        }
+                    }
+                },
+                series: []
+            };
+            
+            chart.setOption(option);
+            
+            // 添加点击事件
+            chart.on('click', function(params) {
+                if (params.componentType === 'series' && params.seriesType === 'scatter' && params.data && params.data.length >= 3) {
+                    showFeatureModal(params.data[2]); // 完整数据对象在第三个位置
+                }
+            });
+        }
+        
+        // 加载默认数据 - 使用完整的CSV数据
+        function loadDefaultData() {
+            console.log('开始加载默认数据...');
+            
+            // 直接使用完整的CSV数据内容（包含修改后的KANO类型）
+            const csvData = `业务模块,功能模块,功能项,功能类型,KANO类型,功能点,X,Y,理由
+基础公共服务,权限管理,角色管理,用户配置,魅力型需求,角色管理,0.394,0.276,auto-generated
+基础公共服务,权限管理,部门/用户组管理,用户配置,魅力型需求,部门/用户组管理,0.55,0.429,auto-generated
+基础公共服务,权限管理,用户管理,用户配置,基本型需求,用户管理,0.968,0.08,auto-generated
+基础公共服务,日志管理,操作日志,售后维护,基本型需求,操作日志,0.781,0.045,auto-generated
+基础公共服务,日志管理,联动日志,售后维护,基本型需求,日志查询,0.855,-0.025,auto-generated
+基础公共服务,系统工具,系统工具,售后维护,期望型需求,系统工具,0.148,-0.894,auto-generated
+基础公共服务,系统配置,监控配置,售后维护,基本型需求,监控配置,0.853,-0.063,auto-generated
+基础公共服务,系统配置,在线配置,售后维护,基本型需求,在线配置,0.668,-0.262,auto-generated
+基础公共服务,系统配置,集中批量配置,售后维护,基本型需求,集中批量配置,0.62,-0.441,auto-generated
+基础公共服务,系统维护,升级,售后维护,基本型需求,升级,0.449,-0.63,auto-generated
+基础公共服务,系统维护,备份和还原,售后维护,基本型需求,备份和还原,0.782,-0.312,auto-generated
+基础公共服务,系统维护,系统运行记录,售后维护,基本型需求,系统运行记录,0.931,0.126,auto-generated
+基础公共服务,系统维护,时间同步,售后维护,基本型需求,时间同步,0.968,0.202,auto-generated
+基础公共服务,系统维护,设备调测,售后维护,期望型需求,设备调测,0.501,-0.117,auto-generated
+基础公共服务,系统维护,看门狗,售后维护,期望型需求,看门狗,0.41,-0.296,auto-generated
+基础公共服务,系统维护,远程维护,售后维护,期望型需求,远程维护,0.417,-0.193,auto-generated
+基础公共服务,系统自诊断,系统自恢复,售后维护,基本型需求,系统自恢复,0.43,-0.834,auto-generated
+基础公共服务,安全管理,账户密码安全,动环面客,基本型需求,账户密码安全,0.716,-0.089,auto-generated
+基础公共服务,安全管理,系统安全,动环面客,基本型需求,系统安全,0.507,-0.539,auto-generated
+基础公共服务,系统自监控,系统自监控,动环面客,基本型需求,系统自监控,0.661,-0.229,auto-generated
+基础公共服务,多语言,多语言,动环面客,魅力型需求,多语言,0.582,0.512,auto-generated
+基础公共服务,系统换肤,登录页配置,用户配置,魅力型需求,登录页配置,0.02,0.106,auto-generated
+基础公共服务,系统换肤,系统换肤,用户配置,魅力型需求,系统换肤,0.072,0.145,auto-generated
+数据管理,数据采集,实时数据采集,动环面客,基本型需求,实时数据采集,0.912,0.236,auto-generated
+数据管理,数据采集,实时曲线,动环面客,期望型需求,实时曲线,0.391,-0.174,auto-generated
+数据管理,数据采集,设备接入,工程施工,基本型需求,设备接入,0.745,-0.021,auto-generated
+数据管理,数据处理,计算和策略运算,工程施工,基本型需求,计算和策略运算,0.762,-0.208,auto-generated
+数据管理,数据处理,历史曲线,动环面客,魅力型需求,历史曲线,0.774,0.702,auto-generated
+数据管理,数据处理,数据存储策略,用户配置,基本型需求,数据存储策略,0.674,-0.351,auto-generated
+数据管理,数据处理,数据过时清理,售后维护,基本型需求,数据过时清理,0.441,-0.733,auto-generated
+数据管理,数据传输,数据缓存/续传,动环面客,基本型需求,数据缓存/续传,0.847,-0.067,auto-generated
+数据管理,数据传输,网络方式,动环面客,基本型需求,网络方式,0.538,-0.6,auto-generated
+数据管理,数据传输,主动上报,动环面客,基本型需求,主动上报,0.684,-0.222,auto-generated
+数据管理,数据发布,标准北向接口,工程施工,基本型需求,标准北向接口,0.777,-0.148,auto-generated
+数据管理,数据发布,北向接口定制,工程施工,魅力型需求,北向接口定制,0.18,0.227,auto-generated
+联动控制,控制策略,控制策略自定义,工程施工,基本型需求,控制策略自定义,0.425,-0.721,auto-generated
+联动控制,控制策略,定时控制,工程施工,基本型需求,定时控制,0.681,-0.273,auto-generated
+联动控制,远程控制,远程控制,售后维护,魅力型需求,远程控制,0.742,-0.193,auto-generated
+告警管理,告警生命周期,告警过滤,动环面客,期望型需求,告警过滤,0.778,0.421,auto-generated
+告警管理,告警生命周期,告警生成和恢复,动环面客,基本型需求,告警生成和恢复,0.58,-0.463,auto-generated
+告警管理,告警生命周期,告警分级,动环面客,期望型需求,告警分级,0.342,-0.186,auto-generated
+告警管理,告警生命周期,告警配置,用户配置,期望型需求,告警配置,0.358,-0.304,auto-generated
+告警管理,告警生命周期,告警查询,动环面客,期望型需求,告警分类,0.492,-0.075,auto-generated
+告警管理,告警生命周期,告警屏蔽,用户配置,期望型需求,告警屏蔽,0.662,0.134,auto-generated
+告警管理,告警生命周期,告警受理,动环面客,基本型需求,告警受理,0.43,-0.761,auto-generated
+告警管理,告警生命周期,告警确认,动环面客,基本型需求,告警确认,0.501,-0.515,auto-generated
+告警管理,告警告知策略,告警/事件发送策略,用户配置,魅力型需求,告警/事件发送策略,0.268,0.199,auto-generated
+告警管理,告警告知策略,APP查询,动环面客,魅力型需求,APP查询,0.766,0.657,auto-generated
+告警管理,告警告知策略,定时报平安,动环面客,魅力型需求,定时报平安,0.177,0.323,auto-generated
+告警管理,告警告知策略,信息模板,用户配置,魅力型需求,信息模板,0.387,0.27,auto-generated
+告警管理,告警告知策略,风暴预警,动环面客,魅力型需求,风暴预警,0.227,0.249,auto-generated
+告警管理,告警告知方式,短信告警,动环面客,基本型需求,短信告警,0.695,-0.545,auto-generated
+告警管理,告警告知方式,电话语音告警,动环面客,基本型需求,电话语音告警,0.947,0.121,auto-generated
+告警管理,告警告知方式,邮件告警,动环面客,基本型需求,邮件告警,0.551,-0.557,auto-generated
+告警管理,告警告知方式,界面告警,动环面客,基本型需求,界面告警,0.975,0.181,auto-generated
+告警管理,告警告知方式,声光告警,动环面客,基本型需求,声光告警,0.694,-0.328,auto-generated
+告警管理,告警告知方式,桌面语音告警,动环面客,基本型需求,桌面语音告警,0.743,-0.147,auto-generated
+告警管理,告警告知方式,微信告警,动环面客,基本型需求,微信告警,0.759,-0.047,auto-generated
+告警管理,告警告知方式,popo告警,动环面客,基本型需求,popo告警,0.713,-0.121,auto-generated
+告警管理,告警告知记录,告警告知记录跟踪,动环面客,期望型需求,告警告知记录跟踪,0.915,0.95,auto-generated
+移动APP,数据管理,数据展示,动环面客,魅力型需求,魅力,0.307,0.177,auto-generated
+移动APP,数据管理,实时数据曲线,动环面客,魅力型需求,实时数据曲线,0.777,0.685,auto-generated
+移动APP,数据管理,历史数据曲线,动环面客,魅力型需求,历史数据曲线,0.01,0.274,auto-generated
+移动APP,设备控制,远程控制设备,动环面客,魅力型需求,远程控制设备,0.459,0.337,auto-generated
+移动APP,告警/事件告知,接收实时告警推送,动环面客,魅力型需求,接收实时告警推送,0.072,0.152,auto-generated
+移动APP,告警/事件告知,历史告警,动环面客,魅力型需求,历史告警,0.173,0.266,auto-generated
+移动APP,告警/事件告知,告警处理,动环面客,魅力型需求,告警处理,0.685,0.528,auto-generated
+移动APP,告警/事件告知,查看告警设备详情,动环面客,魅力型需求,查看告警设备详情,0.469,0.436,auto-generated
+移动APP,设备查询,设备查询,动环面客,魅力型需求,设备查询,0.287,0.222,auto-generated
+移动APP,设备查询,关注设备,动环面客,魅力型需求,关注设备,0.487,0.315,auto-generated
+报表报告,查询报表,事件查询,动环面客,基本型需求,事件查询,0.848,0.044,auto-generated
+报表报告,查询报表,事件生命周期查询,动环面客,基本型需求,事件生命周期查询,0.713,-0.253,auto-generated
+报表报告,查询报表,数据查询,动环面客,基本型需求,数据查询,0.71,-0.257,auto-generated
+工程组态,工程组态,空间设备管理,工程施工,基本型需求,空间设备管理,0.82,-0.191,auto-generated
+工程组态,工程组态,连接管理,工程施工,基本型需求,连接管理,0.598,-0.562,auto-generated
+工程组态,工程组态,配置项管理,工程施工,基本型需求,配置项管理,0.599,-0.58,auto-generated
+工程组态,工程组态,模板管理,工程施工,基本型需求,模板管理,0.603,-0.278,auto-generated
+工程组态,工程组态,页面组态,工程施工,基本型需求,页面组态,0.793,-0.108,auto-generated
+工程组态,工程组态,设备组态,工程施工,基本型需求,设备组态,0.863,-0.164,auto-generated
+工程组态,工程组态,图元管理,工程施工,基本型需求,图元管理,0.68,-0.446,auto-generated
+工程组态,工程组态,历史曲线图元,工程施工,期望型需求,历史曲线图元,0.99,0.063,auto-generated
+工程组态,工程组态,报警图元,工程施工,基本型需求,报警图元,0.593,-0.244,auto-generated
+工程组态,工程组态,电力组态,工程施工,基本型需求,电力组态,0.644,-0.431,auto-generated
+工程组态,工程组态,摄像头图元,工程施工,基本型需求,摄像头图元,0.421,-0.756,auto-generated
+界面展示,组态页面展示,浏览器,动环面客,基本型需求,浏览器,0.503,-0.698,auto-generated
+界面展示,组态页面展示,搜索查询,动环面客,基本型需求,搜索查询,0.783,-0.206,auto-generated
+界面展示,组态页面展示,分层分级页面展示,动环面客,基本型需求,分层分级页面展示,0.424,-0.626,auto-generated
+界面展示,组态页面展示,设备页面标准化展示,动环面客,基本型需求,设备页面标准化展示,0.938,0.196,auto-generated
+界面展示,组态页面展示,页面导航,动环面客,基本型需求,页面导航,0.439,-0.635,auto-generated
+界面展示,组态页面展示,设备树,动环面客,基本型需求,设备树,0.498,-0.81,auto-generated
+界面展示,组态页面展示,屏幕和分辨率适配,动环面客,基本型需求,屏幕和分辨率适配,0.853,-0.109,auto-generated
+界面展示,组态页面展示,矢量缩放,动环面客,魅力型需求,矢量缩放,0.045,0.279,auto-generated
+界面展示,组态页面展示,页面风格,动环面客,魅力型需求,页面风格,0.773,0.553,auto-generated
+界面展示,告警展示,告警统计展示,动环面客,基本型需求,告警统计展示,0.861,-0.177,auto-generated
+界面展示,告警展示,告警事件栏,动环面客,基本型需求,告警事件栏,0.535,-0.565,auto-generated
+界面展示,告警展示,告警360,动环面客,期望型需求,告警360,0.651,0.53,auto-generated
+界面展示,告警展示,列设置,用户配置,魅力型需求,列设置,0.12,0.3,auto-generated
+界面展示,大屏展示,大屏展示,动环面客,期望型需求,大屏展示,0.669,0.414,auto-generated
+界面展示,大屏展示,界面轮播,动环面客,期望型需求,界面轮播,0.505,-0.059,auto-generated
+消息中心,通知公告,公告总览,动环面客,基本型需求,基本,0.974,0.059,auto-generated
+消息中心,通知公告,创建公告,动环面客,基本型需求,创建公告,0.762,-0.192,auto-generated
+消息中心,通知公告,草稿箱,动环面客,基本型需求,草稿箱,0.818,-0.046,auto-generated
+消息中心,通知公告,已发公告,动环面客,基本型需求,已发公告,0.913,0.016,auto-generated
+消息中心,通知公告,全部公告,动环面客,基本型需求,全部公告,0.802,-0.215,auto-generated
+消息中心,通知公告,公告配置,动环面客,基本型需求,公告配置,0.616,-0.355,auto-generated
+消息中心,系统消息,消息总览,动环面客,基本型需求,消息总览,0.495,-0.591,auto-generated
+消息中心,系统消息,消息配置,动环面客,基本型需求,消息配置,0.536,-0.45,auto-generated
+资产信息,资产总览,资产信息,动环面客,魅力型需求,资产信息,0.059,0.12,auto-generated
+资产信息,资产总览,新增资产,动环面客,魅力型需求,新增资产,0.7,0.661,auto-generated
+资产信息,资产总览,下载模板,动环面客,魅力型需求,下载模板,0.689,0.499,auto-generated
+资产信息,资产总览,资产导出,动环面客,魅力型需求,资产导出,0.557,0.501,auto-generated
+资产信息,资产总览,上架导入,动环面客,魅力型需求,上架导入,0.569,0.526,auto-generated
+资产信息,资产总览,批量更新,动环面客,魅力型需求,批量更新,0.521,0.303,auto-generated
+资产信息,资产总览,批量绑定,动环面客,魅力型需求,批量绑定,0.123,0.243,auto-generated
+资产信息,资产总览,刷新,动环面客,魅力型需求,刷新,0.347,0.253,auto-generated
+资产信息,资产总览,定位,动环面客,魅力型需求,定位,0.525,0.4,auto-generated
+资产信息,资产总览,操作,动环面客,魅力型需求,操作,0.092,0.284,auto-generated
+资产信息,配置,资产检测设备,用户配置,魅力型需求,资产检测设备,0.076,0.125,auto-generated
+资产信息,配置,自动上下架配置,用户配置,魅力型需求,自动上下架配置,0.135,0.161,auto-generated
+资产信息,配置,自动绑定配置,用户配置,魅力型需求,自动绑定配置,0.286,0.29,auto-generated
+资产信息,配置,U位指示灯状态配置,用户配置,魅力型需求,U位指示灯状态配置,0.209,0.338,auto-generated
+资产信息,配置,资产条告警级别配置,用户配置,魅力型需求,资产条告警级别配置,0.601,0.539,auto-generated
+抓拍记录,抓拍记录,抓拍记录,动环面客,魅力型需求,抓拍记录,0.259,0.288,auto-generated
+云平板,信息展示,总览,动环面客,基本型需求,总览,0.636,-0.421,auto-generated
+云平板,信息展示,配电,动环面客,基本型需求,配电,0.659,-0.468,auto-generated
+云平板,信息展示,环境,动环面客,基本型需求,环境,0.547,-0.568,auto-generated
+云平板,信息展示,防护,动环面客,基本型需求,防护,0.805,0.094,auto-generated
+云平板,信息展示,IT设施,动环面客,基本型需求,IT设施,0.579,-0.459,auto-generated
+云平板,信息展示,资产信息,动环面客,基本型需求,资产信息,0.79,0.022,auto-generated
+云平板,个人设置,信息详情,用户配置,基本型需求,信息详情,0.889,-0.11,auto-generated
+云平板,个人设置,刷脸设置,用户配置,基本型需求,刷脸设置,0.425,-0.733,auto-generated
+云平板,个人设置,修改密码,用户配置,基本型需求,修改密码,0.757,-0.279,auto-generated
+云平板,个人设置,问题反馈,用户配置,基本型需求,问题反馈,0.607,-0.53,auto-generated
+云平板,个人设置,告警配置,用户配置,基本型需求,告警配置,0.797,-0.19,auto-generated
+云平板,个人设置,当前版本,用户配置,基本型需求,当前版本,0.484,-0.48,auto-generated
+云平板,个人设置,注销登录,用户配置,基本型需求,注销登录,0.652,-0.299,auto-generated
+云平板,告警展示,告警统计展示,动环面客,基本型需求,告警统计展示,0.96,-0.022,auto-generated
+云平板,人脸识别,人脸识别,动环面客,魅力型需求,人脸识别,0.745,0.579,auto-generated
+门禁,门禁系统,开门控制,动环面客,魅力型需求,北向连接,0.354,0.213,auto-generated`;
+ECO,ECO,ECO,动环面客,魅力型需求,ECO,0.364,0.255,auto-generated
+            
+            console.log('使用完整CSV数据，包含', csvData.split('\n').length - 1, '条记录');
+            parseCSVData(csvData);
+        }
+        
+        // 填充功能类型筛选器选项
+        function populateFilters() {
+            const functionTypes = [...new Set(allData.map(d => d.功能类型))].filter(Boolean);
+            
+            console.log('可用的功能类型:', functionTypes);
+            
+            populateSelect('functionType', functionTypes);
+            updateFilterStatus();
+        }
+        
+        // 填充下拉选择框
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            // 保留第一个"全部"选项
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+        
+        // 应用功能类型筛选
+        function applyFilters() {
+            const selectedFunctionType = document.getElementById('functionType').value;
+            
+            console.log('=== 开始筛选 ===');
+            console.log('筛选条件:', {
+                功能类型: selectedFunctionType
+            });
+            console.log('原始数据总数:', allData.length);
+            
+            // 重新从原始数据开始筛选
+            filteredData = allData.filter(item => {
+                // 功能类型筛选  
+                const functionMatch = !selectedFunctionType || item.功能类型 === selectedFunctionType;
+                
+                return functionMatch;
+            });
+            
+            console.log(`筛选结果: ${filteredData.length}/${allData.length} 条数据`);
+            
+            if (filteredData.length > 0) {
+                console.log('筛选后的数据样本:', filteredData.slice(0, 3).map(item => ({
+                    功能项: item.功能项,
+                    功能类型: item.功能类型,
+                    KANO类型: item.KANO类型
+                })));
+                
+                // 统计筛选后的KANO类型分布
+                const kanoDistribution = filteredData.reduce((acc, item) => {
+                    acc[item.KANO类型] = (acc[item.KANO类型] || 0) + 1;
+                    return acc;
+                }, {});
+                console.log('筛选后的KANO类型分布:', kanoDistribution);
+            } else {
+                console.log('筛选结果为空！');
+            }
+            console.log('=== 筛选结束 ===');
+            
+            updateChart();
+            updateStats();
+            updateFilterStatus();
+        }
+        
+        // 重置筛选（显示全部）
+        function resetFilters() {
+            document.getElementById('functionType').selectedIndex = 0;
+            filteredData = [...allData];
+            updateChart();
+            updateStats();
+            updateFilterStatus();
+            console.log('已重置所有筛选条件');
+        }
+        
+        // 更新筛选状态显示
+        function updateFilterStatus() {
+            const selectedFunctionType = document.getElementById('functionType').value;
+            
+            const activeFilters = [];
+            if (selectedFunctionType) activeFilters.push(`功能类型: ${selectedFunctionType}`);
+            
+            const statusElement = document.getElementById('filterStatus');
+            if (activeFilters.length > 0) {
+                statusElement.textContent = `当前筛选: ${activeFilters.join(' | ')}`;
+                statusElement.style.color = '#2c3e50';
+            } else {
+                statusElement.textContent = '显示全部数据';
+                statusElement.style.color = '#7f8c8d';
+            }
+        }
+        
+        // 解析CSV数据
+        function parseCSVData(csvText) {
+            console.log('开始解析CSV数据，长度:', csvText.length);
+            
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    console.log('Papa解析结果:', results);
+                    console.log('解析的原始数据条数:', results.data.length);
+                    
+                    allData = results.data
+                        .filter(row => row.功能点 && row.功能点.trim() !== '')
+                        .map((row, index) => {
+                            // 清理数据，移除重复的前缀
+                            let cleanFunctionPoint = row.功能点;
+                            if (cleanFunctionPoint.includes('""')) {
+                                const parts = cleanFunctionPoint.split('","');
+                                cleanFunctionPoint = parts[parts.length - 1].replace(/"/g, '');
+                            }
+                            
+                            const item = {
+                                业务模块: (row.业务模块 || '').trim(),          // A列
+                                功能模块: (row.功能模块 || '').trim(),          // B列
+                                功能项: (row.功能项 || '').trim(),            // C列
+                                功能类型: (row.功能类型 || '用户配置').trim(),    // D列：动环面客/售后维护/用户配置/工程施工
+                                KANO类型: (row.KANO类型 || '期望型需求').trim(), // E列：基本型需求/魅力型需求/无差异需求/期望型需求
+                                功能点: cleanFunctionPoint,          // F列：功能描述
+                                X: parseFloat(row.X) || 0,          // G列
+                                Y: parseFloat(row.Y) || 0,          // H列
+                                理由: (row.理由 || '').trim()                 // I列
+                            };
+                            
+                            // 记录前几条数据样本
+                            if (index < 3) {
+                                console.log(`数据样本 ${index + 1}:`, item);
+                            }
+                            
+                            return item;
+                        });
+                    
+                    console.log(`过滤后的数据条数: ${allData.length}`);
+                    console.log('KANO类型分布:', allData.reduce((acc, item) => {
+                        acc[item.KANO类型] = (acc[item.KANO类型] || 0) + 1;
+                        return acc;
+                    }, {}));
+                    
+                    // 检查功能类型分布
+                    console.log('功能类型分布:', allData.reduce((acc, item) => {
+                        acc[item.功能类型] = (acc[item.功能类型] || 0) + 1;
+                        return acc;
+                    }, {}));
+                    
+                    filteredData = [...allData];
+                    updateChart();
+                    populateFilters();
+                    updateStats();
+                    
+                    console.log(`成功加载 ${allData.length} 条数据`);
+                }
+            });
+        }
+        
+        
+        // 防重叠算法 - 适应标准KANO坐标系统
+        function adjustOverlappingPoints(data) {
+            const adjusted = [...data];
+            const minDistance = showLabels ? 0.08 : 0.04; // 显示标签时增加最小距离
+            const maxIterations = 50;
+            
+            for (let iter = 0; iter < maxIterations; iter++) {
+                let hasCollision = false;
+                
+                for (let i = 0; i < adjusted.length; i++) {
+                    for (let j = i + 1; j < adjusted.length; j++) {
+                        const dx = adjusted[i].adjustedX - adjusted[j].adjustedX;
+                        const dy = adjusted[i].adjustedY - adjusted[j].adjustedY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < minDistance && distance > 0) {
+                            hasCollision = true;
+                            const overlap = minDistance - distance;
+                            const moveDistance = overlap / 2;
+                            
+                            const moveX = (dx / distance) * moveDistance;
+                            const moveY = (dy / distance) * moveDistance;
+                            
+                            // X坐标限制在[0,1]，Y坐标限制在[-1,1]
+                            adjusted[i].adjustedX = Math.max(0.02, Math.min(0.98, adjusted[i].adjustedX + moveX));
+                            adjusted[i].adjustedY = Math.max(-0.98, Math.min(0.98, adjusted[i].adjustedY + moveY));
+                            adjusted[j].adjustedX = Math.max(0.02, Math.min(0.98, adjusted[j].adjustedX - moveX));
+                            adjusted[j].adjustedY = Math.max(-0.98, Math.min(0.98, adjusted[j].adjustedY - moveY));
+                        }
+                    }
+                }
+                
+                if (!hasCollision) break;
+            }
+            
+            return adjusted;
+        }        
+        // 生成标准KANO模型理论曲线 - 按照数学公式精确绘制
+        function generateKanoTheoryCurves() {
+            const curves = [];
+            const α = 3;  // 控制弯曲程度的参数，推荐值3
+            const step = 0.005; // 更小的步长使曲线更平滑
+            
+            // 1. 期望需求（Performance，线性）
+            // y = 2x - 1
+            const performanceData = [];
+            for (let x = 0; x <= 1; x += step) {
+                const y = 2 * x - 1;
+                performanceData.push([x, y]);
+            }
+            
+            curves.push({
+                name: '期望需求 (Performance)',
+                type: 'line',
+                data: performanceData,
+                smooth: false,
+                lineStyle: {
+                    color: '#2E7D32',
+                    width: 3,
+                    type: 'solid'
+                },
+                symbol: 'none',
+                z: 5,
+                showSymbol: false
+            });
+            
+            // 2. 魅力需求（Attractive，凸增）
+            // y = (e^(αx) - 1) / (e^α - 1) + 0.3 (上移0.3)
+            const attractiveData = [];
+            const eAlpha = Math.exp(α);
+            for (let x = 0; x <= 1; x += step) {
+                const y = (Math.exp(α * x) - 1) / (eAlpha - 1) + 0.3;
+                attractiveData.push([x, y]);
+            }
+            
+            curves.push({
+                name: '魅力需求 (Attractive)',
+                type: 'line',
+                data: attractiveData,
+                smooth: true,
+                lineStyle: {
+                    color: '#FF9800',
+                    width: 3,
+                    type: 'solid'
+                },
+                symbol: 'none',
+                z: 5,
+                showSymbol: false
+            });
+            
+            // 3. 基本需求（Must-be，负区间饱和到零）
+            // y = -(e^(α(1-x)) - 1) / (e^α - 1) - 0.3 (下移0.3)
+            const mustBeData = [];
+            for (let x = 0; x <= 1; x += step) {
+                const y = -(Math.exp(α * (1 - x)) - 1) / (eAlpha - 1) - 0.3;
+                mustBeData.push([x, y]);
+            }
+            
+            curves.push({
+                name: '基本需求 (Must-be)',
+                type: 'line',
+                data: mustBeData,
+                smooth: true,
+                lineStyle: {
+                    color: '#C62828',
+                    width: 3,
+                    type: 'solid'
+                },
+                symbol: 'none',
+                z: 5,
+                showSymbol: false
+            });
+            
+            // 4. 无差异需求（Indifferent，近水平）
+            // y ≡ 0
+            const indifferentData = [];
+            for (let x = 0; x <= 1; x += step) {
+                const y = 0;
+                indifferentData.push([x, y]);
+            }
+            
+            curves.push({
+                name: '无差异需求 (Indifferent)',
+                type: 'line',
+                data: indifferentData,
+                smooth: false,
+                lineStyle: {
+                    color: '#757575',
+                    width: 2,
+                    type: 'solid'
+                },
+                symbol: 'none',
+                z: 5,
+                showSymbol: false
+            });
+            
+            // 5. 反向需求（Reverse，负相关）
+            // y = 1 - 2x
+            const reverseData = [];
+            for (let x = 0; x <= 1; x += step) {
+                const y = 1 - 2 * x;
+                reverseData.push([x, y]);
+            }
+            
+            curves.push({
+                name: '反向需求 (Reverse)',
+                type: 'line',
+                data: reverseData,
+                smooth: false,
+                lineStyle: {
+                    color: '#6A1B9A',
+                    width: 3,
+                    type: 'solid'
+                },
+                symbol: 'none',
+                z: 5,
+                showSymbol: false
+            });
+            
+            return curves;
+        }
+
+        // 根据KANO类型计算理论位置
+        function calculateKanoPosition(kanoType, originalX, originalY) {
+            const x = originalX;
+            let y;
+            const α = 3;
+            const scatter = showLabels ? 0.25 : 0.15; // 显示标签时增加散布范围
+            
+            switch(kanoType) {
+                case 'Attractive':
+                case '魅力型需求':
+                    // 魅力需求曲线：y = (e^(3x) - 1) / (e^3 - 1) + 0.3
+                    y = (Math.exp(α * x) - 1) / (Math.exp(α) - 1) + 0.3;
+                    break;
+                case 'One-dimensional':
+                case '期望型需求':
+                    // 期望需求直线：y = 2x - 1
+                    y = 2 * x - 1;
+                    break;
+                case 'Must-be':
+                case '基本型需求':
+                    // 基本需求曲线：y = -(e^(3(1-x)) - 1) / (e^3 - 1) - 0.3
+                    y = -(Math.exp(α * (1 - x)) - 1) / (Math.exp(α) - 1) - 0.3;
+                    break;
+                case 'Indifferent':
+                case '无差异需求':
+                    // 无差异需求：y = 0
+                    y = 0;
+                    break;
+                case 'Reverse':
+                case '反向型需求':
+                    // 反向需求：y = 1 - 2x
+                    y = 1 - 2 * x;
+                    break;
+                default:
+                    // 使用原始Y坐标转换
+                    y = originalY * 2 - 1;
+            }
+            
+            // 添加随机散布，避免重叠
+            const scatterX = (Math.random() - 0.5) * scatter;
+            const scatterY = (Math.random() - 0.5) * scatter;
+            
+            return {
+                x: Math.max(0.02, Math.min(0.98, x + scatterX)),
+                y: Math.max(-0.98, Math.min(0.98, y + scatterY))
+            };
+        }
+        
+        // 切换标签显示
+        function toggleLabels() {
+            showLabels = document.getElementById('showLabels').checked;
+            updateChart();
+        }
+        
+        // 标签防重叠算法 - 按KANO类型分层排列
+        function adjustLabelPositions(data) {
+            if (!showLabels) return data;
+            
+            const adjusted = [...data];
+            
+            // 按KANO类型分组
+            const kanoGroups = {
+                '魅力型需求': [],
+                '期望型需求': [],
+                '基本型需求': [],
+                '无差异需求': [],
+                '反向型需求': []
+            };
+            
+            adjusted.forEach(item => {
+                const type = item.KANO类型 || '无差异需求';
+                if (kanoGroups[type]) {
+                    kanoGroups[type].push(item);
+                }
+            });
+            
+            // 为每个KANO类型分配不同的Y轴偏移
+            const typeOffsets = {
+                '魅力型需求': 0.15,    // 蓝色往上偏移
+                '期望型需求': 0.05,    // 绿色稍微往上
+                '基本型需求': -0.05,   // 红色稍微往下
+                '无差异需求': -0.15,   // 灰色往下
+                '反向型需求': -0.25    // 紫色最往下
+            };
+            
+            // 处理每个KANO类型组
+            Object.keys(kanoGroups).forEach(kanoType => {
+                const group = kanoGroups[kanoType];
+                if (group.length === 0) return;
+                
+                // 按X坐标排序
+                group.sort((a, b) => a.adjustedX - b.adjustedX);
+                
+                // 应用Y轴偏移
+                const baseOffset = typeOffsets[kanoType] || 0;
+                group.forEach((item, index) => {
+                    // 在基础偏移上添加小的随机偏移，避免完全重叠
+                    const randomOffset = (Math.random() - 0.5) * 0.08;
+                    item.adjustedY = Math.max(-0.95, Math.min(0.95, item.adjustedY + baseOffset + randomOffset));
+                    
+                    // 在X轴上稍微分散
+                    const xOffset = (Math.random() - 0.5) * 0.06;
+                    item.adjustedX = Math.max(0.05, Math.min(0.95, item.adjustedX + xOffset));
+                });
+            });
+            
+            return adjusted;
+        }
+        
+        // 更新图表 - 根据KANO类型智能定位数据点
+        function updateChart() {
+            console.log('=== 开始更新图表 ===');
+            console.log('filteredData长度:', filteredData.length);
+            
+            if (filteredData.length === 0) {
+                console.warn('没有数据可显示，将清空图表');
+                // 清空散点图，只保留理论曲线
+                const kanoTheoryCurves = generateKanoTheoryCurves();
+                chart.setOption({
+                    series: kanoTheoryCurves
+                });
+                return;
+            }
+            
+            console.log('filteredData前3条:', filteredData.slice(0, 3).map(item => ({
+                功能项: item.功能项,
+                业务模块: item.业务模块,
+                功能类型: item.功能类型,
+                KANO类型: item.KANO类型
+            })));
+            
+            const dataWithAdjusted = filteredData.map(item => {
+                const position = calculateKanoPosition(item.KANO类型, item.X, item.Y);
+                return {
+                ...item,
+                    adjustedX: position.x,
+                    adjustedY: position.y
+                };
+            });
+            
+            console.log('前3个调整后的数据点:', dataWithAdjusted.slice(0, 3));
+            
+            // 应用防重叠算法
+            let adjustedData = adjustOverlappingPoints(dataWithAdjusted);
+            
+            // 如果显示标签，应用标签防重叠算法
+            if (showLabels) {
+                adjustedData = adjustLabelPositions(adjustedData);
+            }
+            
+            const seriesData = {};
+            
+            adjustedData.forEach(item => {
+                const kanoType = item.KANO类型 || 'Unknown';
+                if (!seriesData[kanoType]) {
+                seriesData[kanoType] = {
+                    name: kanoType,
+                    type: 'scatter',
+                    data: [],
+                    symbolSize: showLabels ? 8 : 12, // 显示标签时适当减小点的大小
+                    itemStyle: {
+                        color: kanoColors[kanoType] || '#666666',
+                        opacity: 0.9, // 增加透明度
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            opacity: 1,
+                            borderColor: '#333',
+                            borderWidth: 3,
+                            shadowBlur: 15,
+                            shadowColor: kanoColors[kanoType] || '#666666'
+                        },
+                        scale: 1.5
+                    },
+                    label: showLabels ? {
+                        show: true,
+                        position: function(params) {
+                            // 智能标签位置，根据KANO类型和Y坐标决定
+                            const item = params.data[2];
+                            const y = params.data[1];
+                            const kanoType = item.KANO类型;
+                            
+                            // 魅力型需求（蓝色）优先显示在上方
+                            if (kanoType === '魅力型需求' || kanoType === 'Attractive') {
+                                return 'top';
+                            }
+                            // 期望型需求（绿色）也倾向于上方
+                            if (kanoType === '期望型需求' || kanoType === 'One-dimensional') {
+                                return y > 0.1 ? 'top' : 'bottom';
+                            }
+                            // 其他类型根据Y坐标决定
+                            return y > 0.2 ? 'top' : 'bottom';
+                        },
+                        formatter: function(params) {
+                            const item = params.data[2]; // 完整数据对象
+                            const name = item.功能项 || '';
+                            // 限制标签长度，避免过长
+                            return name.length > 20 ? name.substring(0, 20) + '...' : name;
+                        },
+                        fontSize: 12,
+                        color: '#2c3e50',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        borderColor: kanoColors[kanoType] || '#ddd',
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        padding: [4, 8, 4, 8],
+                        distance: 12,
+                        textStyle: {
+                            fontSize: 12,
+                            fontWeight: 'bold',
+                            color: '#2c3e50'
+                        },
+                        shadowBlur: 3,
+                        shadowColor: 'rgba(0, 0, 0, 0.3)',
+                        shadowOffsetX: 1,
+                        shadowOffsetY: 1
+                    } : {
+                        show: false
+                    },
+                    z: 10
+                };
+                }
+                seriesData[kanoType].data.push([item.adjustedX, item.adjustedY, item]);
+            });
+            
+            const scatterSeries = Object.values(seriesData);
+            console.log('散点系列数量:', scatterSeries.length);
+            console.log('每个系列的数据点数量:', scatterSeries.map(s => ({ name: s.name, count: s.data.length })));
+            
+            // 生成KANO理论曲线
+            const kanoTheoryCurves = generateKanoTheoryCurves();
+            console.log('KANO理论曲线数量:', kanoTheoryCurves.length);
+            
+            // 合并理论曲线和数据点
+            const allSeries = [...kanoTheoryCurves, ...scatterSeries];
+            
+            chart.setOption({
+                series: allSeries
+            });
+            
+            console.log('图表更新完成，包含理论曲线和数据点');
+        }
+        
+        
+        
+        // 更新统计信息
+        function updateStats() {
+            const stats = {};
+            const totalCount = filteredData.length;
+            const originalCount = allData.length;
+            
+            // 按KANO类型统计
+            filteredData.forEach(item => {
+                const type = item.KANO类型 || 'Unknown';
+                stats[type] = (stats[type] || 0) + 1;
+            });
+            
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = '';
+            
+            // 总数统计 - 显示筛选信息
+            const totalStat = document.createElement('div');
+            totalStat.className = 'stat-item';
+            const filterInfo = totalCount === originalCount ? '' : ` / ${originalCount}`;
+            totalStat.innerHTML = `
+                <div class="stat-number">${totalCount}${filterInfo}</div>
+                <div class="stat-label">${totalCount === originalCount ? '功能点总数' : '筛选后/总数'}</div>
+            `;
+            statsGrid.appendChild(totalStat);
+            
+            // 筛选比例
+            if (totalCount !== originalCount) {
+                const percentStat = document.createElement('div');
+                percentStat.className = 'stat-item';
+                const percentage = ((totalCount / originalCount) * 100).toFixed(1);
+                percentStat.innerHTML = `
+                    <div class="stat-number" style="color: #e74c3c">${percentage}%</div>
+                    <div class="stat-label">筛选比例</div>
+                `;
+                statsGrid.appendChild(percentStat);
+            }
+            
+            // 各类型统计
+            Object.entries(stats).forEach(([type, count]) => {
+                const statItem = document.createElement('div');
+                statItem.className = 'stat-item';
+                statItem.innerHTML = `
+                    <div class="stat-number" style="color: ${kanoColors[type] || '#666'}">${count}</div>
+                    <div class="stat-label">${type}</div>
+                `;
+                statsGrid.appendChild(statItem);
+            });
+        }
+        
+        // 显示功能卡片 - 简化版弹窗
+        function showFeatureModal(data) {
+            const modal = document.getElementById('featureModal');
+            const card = document.getElementById('featureCard');
+            
+            const kanoType = data.KANO类型 || 'Unknown';
+            const color = kanoColors[kanoType] || '#666666';
+            
+            // 生成功能路径（从业务模块到功能项）
+            const functionPath = `${data.业务模块} > ${data.功能模块} > ${data.功能项}`;
+            
+            // 功能类型（从D列获取）
+            const functionType = data.功能类型 || '产品功能';
+            
+            card.innerHTML = `
+                <div class="feature-title">${data.功能项}</div>
+                
+                <div class="feature-section">
+                    <div class="function-path">
+                        ${functionPath}
+                </div>
+                </div>
+                
+                <div class="feature-section">
+                    <div class="classification-info">
+                        <span class="info-label">功能类型:</span> <span class="info-value">${functionType}</span>
+                        <span style="margin: 0 15px;">|</span>
+                        <span class="info-label">KANO类型:</span> <span class="tag" style="background-color: ${color};">${kanoType}</span>
+                    </div>
+                </div>
+                
+                <div class="feature-section">
+                    <h4><i class="icon">📋</i> 功能描述</h4>
+                <div class="feature-content">
+                    ${data.功能点}
+                </div>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('featureModal').style.display = 'none';
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('featureModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+    </script>
+</body>
+</html>
+

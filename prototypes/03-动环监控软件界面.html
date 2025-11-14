@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云基动环监控平台</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(160deg, #0a152b 0%, #050913 100%);
+            --sidebar-bg: rgba(14, 26, 48, 0.96);
+            --sidebar-hover: rgba(30, 48, 83, 0.75);
+            --sidebar-active: rgba(48, 86, 149, 0.85);
+            --content-bg: rgba(6, 13, 26, 0.85);
+            --card-bg: rgba(20, 34, 64, 0.92);
+            --panel-bg: rgba(14, 24, 44, 0.94);
+            --border: rgba(83, 120, 182, 0.25);
+            --text-main: #e6ecff;
+            --text-muted: #9fb3d9;
+            --accent: #3ba4ff;
+            --accent-soft: rgba(59, 164, 255, 0.14);
+            --warning: #f6c947;
+            --danger: #ff6c6c;
+            --success: #52d291;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        button {
+            font: inherit;
+            border: none;
+            background: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .app-shell {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            height: 68px;
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(5, 11, 22, 0.9);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(14px);
+        }
+
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .platform-switch {
+            position: relative;
+        }
+
+        .site-tag {
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-soft);
+            color: var(--accent);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .platform-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: rgba(10, 20, 38, 0.96);
+            border: 1px solid rgba(83, 120, 182, 0.25);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
+            padding: 8px 0;
+            min-width: 140px;
+            display: none;
+            z-index: 99;
+        }
+
+        .platform-menu.active {
+            display: block;
+        }
+
+        .platform-menu a {
+            display: block;
+            padding: 8px 16px;
+            color: var(--text-main);
+            font-size: 13px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .platform-menu a:hover {
+            background: rgba(59, 164, 255, 0.18);
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .top-action {
+            padding: 9px 20px;
+            border-radius: var(--radius-md);
+            background: rgba(32, 54, 92, 0.75);
+            color: var(--text-main);
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .top-action:hover {
+            background: rgba(59, 164, 255, 0.85);
+            transform: translateY(-1px);
+        }
+
+        .top-action.active {
+            background: rgba(59, 164, 255, 0.95);
+            box-shadow: 0 6px 16px rgba(59, 164, 255, 0.35);
+        }
+
+        .user-indicator {
+            padding-left: 16px;
+            border-left: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .main-layout {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 68px);
+        }
+
+        .sidebar {
+            width: 246px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 28px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            overflow-y: auto;
+        }
+
+        .menu-title {
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(159, 179, 217, 0.7);
+        }
+
+        .menu-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .menu-btn,
+        .submenu-btn {
+            width: 100%;
+            padding: 12px 16px;
+            text-align: left;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            background: transparent;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .menu-btn:hover,
+        .submenu-btn:hover {
+            background: var(--sidebar-hover);
+            color: var(--text-main);
+        }
+
+        .menu-btn.active,
+        .submenu-btn.active {
+            background: var(--sidebar-active);
+            color: #fff;
+            box-shadow: inset 0 0 0 1px rgba(59, 164, 255, 0.35);
+        }
+
+        .menu-btn.has-arrow::after {
+            content: "▾";
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        .menu-btn.has-arrow.open::after {
+            transform: rotate(-180deg);
+        }
+
+        .submenu {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding-left: 12px;
+        }
+
+        .submenu.open {
+            display: flex;
+        }
+
+        .content-area {
+            flex: 1;
+            background: var(--content-bg);
+            padding: 30px 36px;
+            overflow-y: auto;
+        }
+
+        .content-page {
+            display: none;
+            animation: fadeIn 0.22s ease;
+        }
+
+        .content-page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .meta-line {
+            display: flex;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .card-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            margin-bottom: 26px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            border: 1px solid rgba(83, 120, 182, 0.2);
+            box-shadow: 0 18px 38px rgba(2, 9, 18, 0.45);
+        }
+
+        .card h3 {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .metric {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .metric span {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-left: 6px;
+        }
+
+        .metric.success {
+            color: var(--success);
+        }
+
+        .metric.warning {
+            color: var(--warning);
+        }
+
+        .metric.danger {
+            color: var(--danger);
+        }
+
+        .metric-desc {
+            font-size: 13px;
+            color: rgba(159, 179, 217, 0.78);
+        }
+
+        .metric-footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(83, 120, 182, 0.2);
+            font-size: 12px;
+            color: rgba(159, 179, 217, 0.68);
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: minmax(260px, 320px) 1fr;
+            gap: 24px;
+        }
+
+        .list-panel {
+            background: var(--panel-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(83, 120, 182, 0.22);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .list-item {
+            background: rgba(30, 52, 95, 0.55);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .list-item:hover {
+            background: rgba(59, 164, 255, 0.12);
+            border-color: rgba(59, 164, 255, 0.35);
+        }
+
+        .list-item.active {
+            background: rgba(59, 164, 255, 0.18);
+            border-color: rgba(59, 164, 255, 0.55);
+        }
+
+        .detail-panel {
+            background: var(--panel-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(83, 120, 182, 0.22);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .pill {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .pill.success {
+            background: rgba(82, 210, 145, 0.14);
+            color: var(--success);
+        }
+
+        .pill.warning {
+            background: rgba(246, 201, 71, 0.16);
+            color: var(--warning);
+        }
+
+        .pill.danger {
+            background: rgba(255, 108, 108, 0.16);
+            color: var(--danger);
+        }
+
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .param-card {
+            background: rgba(18, 34, 62, 0.8);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            border-left: 3px solid rgba(59, 164, 255, 0.45);
+        }
+
+        .param-label {
+            font-size: 13px;
+            color: rgba(159, 179, 217, 0.75);
+            margin-bottom: 8px;
+        }
+
+        .param-value {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .table-wrapper {
+            background: var(--panel-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(83, 120, 182, 0.22);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: rgba(18, 34, 62, 0.9);
+        }
+
+        th, td {
+            text-align: left;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(83, 120, 182, 0.18);
+        }
+
+        tbody tr:hover {
+            background: rgba(59, 164, 255, 0.08);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+        }
+
+        .tag.info {
+            background: rgba(59, 164, 255, 0.16);
+            color: var(--accent);
+        }
+
+        .tag.warn {
+            background: rgba(246, 201, 71, 0.18);
+            color: var(--warning);
+        }
+
+        .tag.error {
+            background: rgba(255, 108, 108, 0.18);
+            color: var(--danger);
+        }
+
+        .tag.ok {
+            background: rgba(82, 210, 145, 0.18);
+            color: var(--success);
+        }
+
+        .tab-strip {
+            display: inline-flex;
+            gap: 10px;
+            padding: 8px;
+            border-radius: var(--radius-md);
+            background: rgba(20, 35, 66, 0.8);
+            border: 1px solid rgba(83, 120, 182, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .tab-strip button {
+            padding: 8px 18px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-muted);
+            background: transparent;
+        }
+
+        .tab-strip button.active {
+            background: rgba(59, 164, 255, 0.25);
+            color: #fff;
+            box-shadow: inset 0 0 0 1px rgba(59, 164, 255, 0.4);
+        }
+
+        .tab-section {
+            display: none;
+        }
+
+        .tab-section.active {
+            display: block;
+        }
+
+        .grid-two {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        .timeline {
+            border-left: 2px solid rgba(59, 164, 255, 0.5);
+            padding-left: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 6px;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -25px;
+            top: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(59, 164, 255, 0.9);
+            box-shadow: 0 0 0 3px rgba(59, 164, 255, 0.25);
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .filter-chip {
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            background: rgba(20, 35, 66, 0.78);
+            border: 1px solid rgba(83, 120, 182, 0.22);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: rgba(159, 179, 217, 0.78);
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(83, 120, 182, 0.35);
+            background: rgba(10, 20, 38, 0.85);
+            color: #fff;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .btn-primary {
+            padding: 10px 24px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #3ba4ff 0%, #1e6aff 100%);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .btn-ghost {
+            padding: 10px 24px;
+            border-radius: var(--radius-md);
+            background: rgba(16, 30, 58, 0.85);
+            color: var(--text-muted);
+            border: 1px solid rgba(83, 120, 182, 0.3);
+        }
+
+        .note {
+            font-size: 12px;
+            color: rgba(159, 179, 217, 0.68);
+        }
+
+        @media (max-width: 1320px) {
+            .main-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+                height: auto;
+            }
+
+            .content-area {
+                height: calc(100vh - 68px - 160px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="top-bar">
+            <div class="top-left">
+                <span class="logo">云基动环监控平台</span>
+                <div class="platform-switch">
+                    <button class="site-tag" onclick="togglePlatformMenu(event)">
+                        监控平台
+                        <span style="font-size:12px;">▾</span>
+                    </button>
+                    <div class="platform-menu" id="platformMenu">
+                        <a href="01-工程模板选择界面.html">生产平台</a>
+                        <a href="02-调试自检界面.html">调试平台</a>
+                    </div>
+                </div>
+            </div>
+            <div class="top-right">
+                <button class="top-action" data-group="top" data-target="alarm-center" onclick="openContent(event, 'alarm-center')">告警中心</button>
+                <button class="top-action" data-group="top" data-target="history-center" onclick="openContent(event, 'history-center')">历史中心</button>
+                <button class="top-action" data-group="top" data-target="settings-center" onclick="openContent(event, 'settings-center')">设置中心</button>
+                <div class="user-indicator">管理员 ｜ 在线</div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <aside class="sidebar">
+                <div class="menu-group">
+                    <span class="menu-title">左侧菜单栏</span>
+                    <button class="menu-btn" data-group="side" data-target="overview" onclick="openContent(event, 'overview')">总览</button>
+                    <button class="menu-btn" data-group="side" data-target="power" onclick="openContent(event, 'power')">配电</button>
+                    <button class="menu-btn" data-group="side" data-target="cooling" onclick="openContent(event, 'cooling')">制冷</button>
+                    <button class="menu-btn" data-group="side" data-target="eco" onclick="openContent(event, 'eco')">ECO</button>
+                    <button class="menu-btn has-arrow" onclick="toggleSubmenu(event, 'protectionSubmenu')">防护</button>
+                    <div class="submenu" id="protectionSubmenu">
+                        <button class="submenu-btn" data-group="side" data-target="protection-access" onclick="openContent(event, 'protection-access')">门禁</button>
+                        <button class="submenu-btn" data-group="side" data-target="protection-video" onclick="openContent(event, 'protection-video')">视频</button>
+                    </div>
+                    <button class="menu-btn" data-group="side" data-target="asset" onclick="openContent(event, 'asset')">资产</button>
+                </div>
+            </aside>
+
+            <main class="content-area">
+                <section class="content-page" id="page-overview">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">运行总览</h2>
+                            <div class="meta-line">
+                                <span>更新频率：30s</span>
+                                <span>监控对象：2 个模块化机房 · 60 台设备</span>
+                                <span>同步状态：北向接口正常</span>
+                            </div>
+                        </div>
+                        <div class="meta-line">
+                            <span>当前班次：白班</span>
+                            <span>负责人：张伟</span>
+                        </div>
+                    </div>
+
+                    <div class="card-grid">
+                        <div class="card">
+                            <h3>系统整体状态</h3>
+                            <div class="metric success">100%</div>
+                            <div class="metric-desc">核心服务组件全部在线 · 未检测到异常停机。</div>
+                            <div class="metric-footer">连续运行：15 天 08 小时 ｜ 最近切换策略：2025-11-12 22:16</div>
+                        </div>
+                        <div class="card">
+                            <h3>告警概览</h3>
+                            <div class="metric warning">7<span>实时</span></div>
+                            <div class="metric-desc">严重 1 · 重要 3 · 次要 2 · 提示 1。</div>
+                            <div class="metric-footer">今日新增 12 条 ｜ 闭环率 75%</div>
+                        </div>
+                        <div class="card">
+                            <h3>能源效率 (PUE)</h3>
+                            <div class="metric">1.45</div>
+                            <div class="metric-desc">24 小时滚动值，目标 1.30 ~ 1.50 区间。</div>
+                            <div class="metric-footer">IT 负载 132 kW ｜ 环境功耗 58 kW</div>
+                        </div>
+                        <div class="card">
+                            <h3>环境温湿度</h3>
+                            <div class="metric">23.6 ℃ <span>/ 52 %RH</span></div>
+                            <div class="metric-desc">冷通道平均温度 ｜ 湿度水平稳定。</div>
+                            <div class="metric-footer">波动范围：±2.5 ℃ ｜ ±6 %</div>
+                        </div>
+                        <div class="card">
+                            <h3>资产健康度</h3>
+                            <div class="metric success">98.2%</div>
+                            <div class="metric-desc">327 台资产在线 ｜ 6 台维护中 ｜ 0 台报废。</div>
+                            <div class="metric-footer">工单完成率 92% ｜ 本月巡检 28 次</div>
+                        </div>
+                        <div class="card">
+                            <h3>安全态势</h3>
+                            <div class="metric warning">3<span>未闭环</span></div>
+                            <div class="metric-desc">门禁异常 1 · 视频遮挡 1 · 趋势预测预警 1。</div>
+                            <div class="metric-footer">AI 风险预测准确率 86% ｜ 安全策略版本 v3.2</div>
+                        </div>
+                    </div>
+
+                    <div class="two-column">
+                        <div class="list-panel">
+                            <div class="flex-between">
+                                <strong>关键系统拓扑</strong>
+                                <span class="note">来源：配置中心 · 最近同步 5 分钟前</span>
+                            </div>
+                            <div class="list-item active">
+                                <strong>主电源链路</strong>
+                                <span>市电 A+B → 置换开关 → UPS 集群 → 列头柜</span>
+                                <span class="note">供电冗余：2N ｜ 运行状态：正常</span>
+                            </div>
+                            <div class="list-item">
+                                <strong>制冷回路</strong>
+                                <span>冷冻水系统 + 列间空调 + 风阀联动</span>
+                                <span class="note">能效策略：夜间自然冷却已启用</span>
+                            </div>
+                            <div class="list-item">
+                                <strong>环境监测</strong>
+                                <span>温湿度/烟雾/漏水/颗粒传感网络</span>
+                                <span class="note">采集节点数：86 ｜ 数据完整率：99.1%</span>
+                            </div>
+                            <div class="list-item">
+                                <strong>安全防护</strong>
+                                <span>门禁控制 + 视频联动 + AI 入侵检测</span>
+                                <span class="note">重点区域：冷通道 A/B ｜ 风险等级：低</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-panel">
+                            <div class="detail-header">
+                                <div>
+                                    <h3 style="margin-bottom:6px;">风险洞察 · 近 24 小时</h3>
+                                    <p class="note">基于开源监控项目数据模型（Prometheus + Grafana）提炼的指标。</p>
+                                </div>
+                                <span class="pill warning">重点关注</span>
+                            </div>
+                            <div class="param-grid">
+                                <div class="param-card">
+                                    <div class="param-label">冷通道温度偏差</div>
+                                    <div class="param-value">+2.3 ℃</div>
+                                    <div class="note">触发原因：列间空调 A05 回风温度上升。</div>
+                                </div>
+                                <div class="param-card">
+                                    <div class="param-label">UPS 备用时间</div>
+                                    <div class="param-value">34 min</div>
+                                    <div class="note">低于阈值 40 min，建议检查电池组均衡。</div>
+                                </div>
+                                <div class="param-card">
+                                    <div class="param-label">机柜热失配率</div>
+                                    <div class="param-value">18%</div>
+                                    <div class="note">高于建议值 15%，推荐调整设备布置。</div>
+                                </div>
+                                <div class="param-card">
+                                    <div class="param-label">异常访问拦截</div>
+                                    <div class="param-value">5 次</div>
+                                    <div class="note">夜间未授权刷卡 2 次，已联动视频复核。</div>
+                                </div>
+                            </div>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>待办事项</th>
+                                            <th>责任组</th>
+                                            <th>优先级</th>
+                                            <th>截止时间</th>
+                                            <th>状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>UPS-02 电池均衡校准</td>
+                                            <td>电力运维</td>
+                                            <td><span class="tag warn">高</span></td>
+                                            <td>2025-11-14 18:00</td>
+                                            <td><span class="tag warn">待执行</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>冷通道 A 排风调节</td>
+                                            <td>制冷维护</td>
+                                            <td><span class="tag info">中</span></td>
+                                            <td>2025-11-15 12:00</td>
+                                            <td><span class="tag info">排期中</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>访客权限审核</td>
+                                            <td>安全管理</td>
+                                            <td><span class="tag info">中</span></td>
+                                            <td>2025-11-13 20:00</td>
+                                            <td><span class="tag ok">已受理</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="content-page" id="page-power">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">配电监控</h2>
+                            <div class="meta-line">
+                                <span>配电架构：双路市电 + 2 台 200kVA UPS 并机</span>
+                                <span>巡检频率：15 分钟</span>
+                                <span>数据显示：来自 OpenDCIM / Grafana 面板</span>
+                            </div>
+                        </div>
+                        <span class="pill success">电力稳定</span>
+                    </div>
+
+                    <div class="two-column">
+                        <div class="list-panel">
+                            <div class="flex-between">
+                                <strong>电源链路树</strong>
+                                <span class="note">共 42 个回路，列表展示 Top10 负载</span>
+                            </div>
+                            <div class="list-item active">
+                                <strong>列头柜 LDC-01</strong>
+                                <span>负载 68% ｜ 功率因数 0.95 ｜ 板卡温度 38℃</span>
+                                <span class="note">馈线回路：12 个 ｜ 趋势：轻微上升</span>
+                            </div>
+                            <div class="list-item">
+                                <strong>列头柜 LDC-02</strong>
+                                <span>负载 54% ｜ 功率因数 0.92 ｜ 板卡温度 34℃</span>
+                                <span class="note">馈线回路：10 个 ｜ 趋势：稳定</span>
+                            </div>
+                            <div class="list-item">
+                                <strong>列头柜 LDC-03</strong>
+                                <span>负载 72% ｜ 功率因数 0.96 ｜ 板卡温度 36℃</span>
+                                <span class="note">馈线回路：14 个 ｜ 趋势：需关注</span>
+                            </div>
+                            <div class="list-item">
+                                <strong>UPS 集群</strong>
+                                <span>输入 398V ｜ 输出 400V ｜ 旁路状态：关闭</span>
+                                <span class="note">电池组温度 28℃ ｜ 内阻 3.4mΩ</span>
+                            </div>
+                            <div class="list-item">
+                                <strong>精密配电柜 PDU-A</strong>
+                                <span>支路 18 个 ｜ 漏电检测：正常 ｜ 谐波：2.9%</span>
+                                <span class="note">最大负载支路：机柜列 A02 (75%)</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-panel">
+                            <div class="detail-header">
+                                <div>
+                                    <h3 style="margin-bottom:6px;">列头柜 LDC-01 · 详情</h3>
+                                    <p class="note">数据参考开源项目 EasyNMS / Grafana 电力看板结构。</p>
+                                </div>
+                                <span class="pill success">运行中</span>
+                            </div>
+                            <div class="param-grid">
+                                <div class="param-card">
+                                    <div class="param-label">三相电压</div>
+                                    <div class="param-value">231 / 232 / 229 V</div>
+                                    <div class="note">上下限：220 - 240 V</div>
+                                </div>
+                                <div class="param-card">
+                                    <div class="param-label">三相电流</div>
+                                    <div class="param-value">94 / 92 / 90 A</div>
+                                    <div class="note">平衡度：±2.1%（良好）</div>
+                                </div>
+                                <div class="param-card">
+                                    <div class="param-label">总有功功率</div>
+                                    <div class="param-value">36.5 kW</div>
+                                    <div class="note">较 1 小时前 +3.2%</div>
+                                </div>
+                                <div class="param-card">
+                                    <div class="param-label">总谐波畸变</div>
+                                    <div class="param-value">3.1 %</div>
+                                    <div class="note">来源：逆变器 / IT 负载叠加</div>
+                                </div>
+                            </div>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>回路</th>
+                                            <th>负载率</th>
+                                            <th>电流</th>
+                                            <th>功率因数</th>
+                                            <th>最近告警</th>
+                                            <th>状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>机柜列 A01</td>
+                                            <td>61%</td>
+                                            <td>32A</td>
+                                            <td>0.96</td>
+                                            <td>2025-11-11 电流波动</td>
+                                            <td><span class="tag ok">正常</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>机柜列 A02</td>
+                                            <td>75%</td>
+                                            <td>39A</td>
+                                            <td>0.94</td>
+                                            <td>2025-11-13 温升预警</td>
+                                            <td><span class="tag warn">关注</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>机柜列 A03</td>
+                                            <td>58%</td>
+                                            <td>30A</td>
+                                            <td>0.95</td>
+                                            <td>无</td>
+                                            <td><span class="tag ok">正常</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>机柜列 A04</td>
+                                            <td>42%</td>
+                                            <td>21A</td>
+                                            <td>0.97</td>
+                                            <td>无</td>
+                                            <td><span class="tag ok">正常</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="content-page" id="page-cooling">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">制冷管理</h2>
+                            <div class="meta-line">
+                                <span>制冷拓扑：冷冻水 + 列间空调 + 机柜微环境</span>
+                                <span>数据源：开源 BMS (Niagara) / Telegraf 采集</span>
+                                <span>刷新：60s</span>
+                            </div>
+                        </div>
+                        <span class="pill warning">一项预警</span>
+                    </div>
+
+                    <div class="card-grid">
+                        <div class="card">
+                            <h3>总制冷量</h3>
+                            <div class="metric">153 kW</div>
+                            <div class="metric-desc">负载率 68% ｜ 余量 72 kW</div>
+                            <div class="metric-footer">换热效率 85%</div>
+                        </div>
+                        <div class="card">
+                            <h3>冷水机组</h3>
+                            <div class="metric success">2 / 2 在线</div>
+                            <div class="metric-desc">出水 7.6 ℃ ｜ 回水 11.4 ℃</div>
+                            <div class="metric-footer">COP 3.2 ｜ 夜间节能模式即将启动</div>
+                        </div>
+                        <div class="card">
+                            <h3>列间空调</h3>
+                            <div class="metric warning">1 台需关注</div>
+                            <div class="metric-desc">A05：回风温度 31.2 ℃，较设定高 3 ℃</div>
+                            <div class="metric-footer">已联动派单给制冷工程师</div>
+                        </div>
+                        <div class="card">
+                            <h3>冷通道热偏差</h3>
+                            <div class="metric">2.7 ℃</div>
+                            <div class="metric-desc">与上周同期相比下降 0.4 ℃</div>
+                            <div class="metric-footer">AI预测：预计 6 小时后回落到 2.1 ℃</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-two">
+                        <div class="card">
+                            <h3>盘管换热效率 · 趋势</h3>
+                            <p class="metric-desc">展示基于开源 EmonCMS / Grafana 的热交换效率曲线（占位）。</p>
+                            <div style="margin-top:12px;height:180px;border-radius:12px;background:rgba(59,164,255,0.08);border:1px dashed rgba(59,164,255,0.35);display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+                                图表占位：盘管进出水差温、效率曲线、AI预测线
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>凝结水 & 滤网</h3>
+                            <div class="flex-column" style="margin-top:12px;">
+                                <div class="flex-between">
+                                    <span>凝结水液位</span>
+                                    <span class="pill success">正常</span>
+                                </div>
+                                <p class="note">排水泵最近动作：2025-11-13 09:42 · 排水量 1.8 L</p>
+                                <div class="flex-between">
+                                    <span>过滤网压差</span>
+                                    <span class="pill warning">需巡检</span>
+                                </div>
+                                <p class="note">A05 压差 185 Pa ｜ 超阈值 20 Pa ｜ 建议 24 小时内清洗。</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="content-page" id="page-eco">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">ECO 节能策略</h2>
+                            <div class="meta-line">
+                                <span>策略来源：参考开源项目 EnergyStar / Grafana 节能模板</span>
+                                <span>当前策略：夜间自然冷却 + 负载智能调度</span>
+                            </div>
+                        </div>
+                        <span class="pill success">节能运行</span>
+                    </div>
+
+                    <div class="card-grid">
+                        <div class="card">
+                            <h3>当日节能量</h3>
+                            <div class="metric success">412 kWh</div>
+                            <div class="metric-desc">较昨日提升 6%，主要得益于夜间自然冷却。</div>
+                            <div class="metric-footer">累计节约成本：¥ 3,920</div>
+                        </div>
+                        <div class="card">
+                            <h3>策略启用情况</h3>
+                            <div class="metric">3 / 4</div>
+                            <div class="metric-desc">空调联动、照明联动、自然冷却运行中。</div>
+                            <div class="metric-footer">待开启：IT 负载迁移（需业务窗口）</div>
+                        </div>
+                        <div class="card">
+                            <h3>碳减排贡献</h3>
+                            <div class="metric">0.32 tCO₂e</div>
+                            <div class="metric-desc">本月累计 8.4 tCO₂e，达到季度指标 72%。</div>
+                            <div class="metric-footer">数据按开源碳排标准 GHG Protocol 估算</div>
+                        </div>
+                        <div class="card">
+                            <h3>AI 调优建议</h3>
+                            <div class="metric warning">2 条</div>
+                            <div class="metric-desc">建议调整冷通道风速 ｜ 调整 UPS 深循环策略。</div>
+                            <div class="metric-footer">模型来源：TensorFlow 节能预测示例</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="content-page" id="page-protection-access">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">门禁管理</h2>
+                            <div class="meta-line">
+                                <span>接入控制器：4 台 ｜ 门点：12 个 ｜ 联动摄像机：20 台</span>
+                                <span>数据采集：参考开源项目 Shinobi + openNAC</span>
+                            </div>
+                        </div>
+                        <span class="pill warning">访客待确认</span>
+                    </div>
+
+                    <div class="filter-row">
+                        <span class="filter-chip">今日访客：4 人次</span>
+                        <span class="filter-chip">异常刷卡：2 次</span>
+                        <span class="filter-chip">远程授权：启用</span>
+                        <span class="filter-chip">联动策略：门禁 + 视频 + 告警</span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>时间</th>
+                                    <th>人员</th>
+                                    <th>身份</th>
+                                    <th>通道</th>
+                                    <th>授权组</th>
+                                    <th>结果</th>
+                                    <th>联动</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-11-13 11:20:15</td>
+                                    <td>张伟</td>
+                                    <td>运维工程师</td>
+                                    <td>冷通道 A 门</td>
+                                    <td>运维-高权限</td>
+                                    <td><span class="tag ok">通过</span></td>
+                                    <td>摄像头记录 · 语音播报</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-11-13 09:05:02</td>
+                                    <td>李敏</td>
+                                    <td>访客</td>
+                                    <td>外部门禁</td>
+                                    <td>访客-临时</td>
+                                    <td><span class="tag warn">待确认</span></td>
+                                    <td>视频复核 · 推送至安全群</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-11-12 22:18:41</td>
+                                    <td>王强</td>
+                                    <td>值班人员</td>
+                                    <td>机房主入口</td>
+                                    <td>值班-夜班</td>
+                                    <td><span class="tag ok">通过</span></td>
+                                    <td>自动记录轮班日志</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-11-12 21:58:11</td>
+                                    <td>未知</td>
+                                    <td>未授权</td>
+                                    <td>冷通道 B 门</td>
+                                    <td>无</td>
+                                    <td><span class="tag error">拒绝</span></td>
+                                    <td>触发告警中心 · 视频追踪</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="content-page" id="page-protection-video">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">视频监控</h2>
+                            <div class="meta-line">
+                                <span>接入摄像头：22 台 ｜ 在线 21 ｜ 离线 1</span>
+                                <span>分析引擎：参考开源项目 Kerberos.io / ZLMPlayer</span>
+                            </div>
+                        </div>
+                        <span class="pill warning">1 路异常</span>
+                    </div>
+
+                    <div class="card-grid">
+                        <div class="card">
+                            <h3>AI 异常检测</h3>
+                            <div class="metric warning">2</div>
+                            <div class="metric-desc">通道遮挡 · 门禁联动失败。</div>
+                            <div class="metric-footer">基于 YOLOv8 模型识别 ｜ 更新频率 10s</div>
+                        </div>
+                        <div class="card">
+                            <h3>录像保留</h3>
+                            <div class="metric">72 小时</div>
+                            <div class="metric-desc">云端 + 本地结合 ｜ HLS 实时回放。</div>
+                            <div class="metric-footer">占用空间：1.2 TB ｜ 存储健康：良好</div>
+                        </div>
+                        <div class="card">
+                            <h3>联动事件</h3>
+                            <div class="metric">15 条</div>
+                            <div class="metric-desc">本周安全检测事件，均已闭环。</div>
+                            <div class="metric-footer">类型：入侵判定 8 · 逗留分析 5 · 遗留物 2</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-two">
+                        <div class="card">
+                            <h3>摄像头健康度</h3>
+                            <p class="note">参考开源项目 Zoneminder 的设备健康检查项。</p>
+                            <div class="flex-column" style="margin-top:14px;">
+                                <div class="flex-between">
+                                    <span>冷通道 A 广角</span>
+                                    <span class="pill success">正常</span>
+                                </div>
+                                <div class="flex-between">
+                                    <span>UPS 间红外</span>
+                                    <span class="pill warning">需检查焦距</span>
+                                </div>
+                                <div class="flex-between">
+                                    <span>外场高清</span>
+                                    <span class="pill danger">离线</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>重点录像（近 6 小时）</h3>
+                            <div class="timeline" style="margin-top:14px;">
+                                <div class="timeline-item">
+                                    <strong>11:20 · 冷通道门禁联动</strong>
+                                    <p class="note">访客李敏待确认，已推送管理员回放。</p>
+                                </div>
+                                <div class="timeline-item">
+                                    <strong>10:05 · UPS 间巡检</strong>
+                                    <p class="note">自动识别巡检人员王强，行为正常。</p>
+                                </div>
+                                <div class="timeline-item">
+                                    <strong>09:16 · 列间空调 A05</strong>
+                                    <p class="note">检测到冷凝水报警，视频自动标记。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="content-page" id="page-asset">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">资产管理</h2>
+                            <div class="meta-line">
+                                <span>参考开源 CMDB（iTop / Ralph）数据模型</span>
+                                <span>资产总数：327 ｜ 在线率 98.2%</span>
+                                <span>生命周期：调研 → 上线 → 运维 → 退役</span>
+                            </div>
+                        </div>
+                        <span class="pill success">健康</span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>资产名称</th>
+                                    <th>序列号</th>
+                                    <th>所属系统</th>
+                                    <th>运行状态</th>
+                                    <th>保修到期</th>
+                                    <th>责任人</th>
+                                    <th>备注</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>UPS 主机 EA660</td>
+                                    <td>EA660-G4-1923</td>
+                                    <td>配电</td>
+                                    <td><span class="tag ok">在线</span></td>
+                                    <td>2026-07-18</td>
+                                    <td>唐旭</td>
+                                    <td>运行小时数 12,350 ｜ 最近维保：2025-09-20</td>
+                                </tr>
+                                <tr>
+                                    <td>风冷列间空调 V6</td>
+                                    <td>AC-V6-1027</td>
+                                    <td>制冷</td>
+                                    <td><span class="tag warn">待维护</span></td>
+                                    <td>2025-12-09</td>
+                                    <td>何敏</td>
+                                    <td>回风温度偏高，待更换过滤网</td>
+                                </tr>
+                                <tr>
+                                    <td>门禁控制器 GATE-04</td>
+                                    <td>GATE-04-8871</td>
+                                    <td>防护</td>
+                                    <td><span class="tag ok">在线</span></td>
+                                    <td>2027-03-22</td>
+                                    <td>陈磊</td>
+                                    <td>启用双因子认证 · 支持远程授权</td>
+                                </tr>
+                                <tr>
+                                    <td>IT 服务器刀片 C210</td>
+                                    <td>C210-BL-5568</td>
+                                    <td>资产</td>
+                                    <td><span class="tag ok">在线</span></td>
+                                    <td>2026-05-01</td>
+                                    <td>李涛</td>
+                                    <td>部署业务：云平台核心节点 A1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 顶部功能模块 -->
+                <section class="content-page" id="page-alarm-center">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">告警中心</h2>
+                            <div class="meta-line">
+                                <span>采集引擎：Prometheus Alertmanager / Zabbix / InfluxDB</span>
+                                <span>联动：短信 · 邮件 · 语音 · 工单</span>
+                            </div>
+                        </div>
+                        <div class="meta-line">
+                            <span>实时告警：7</span>
+                            <span>未确认：3</span>
+                            <span>平均响应：8 分钟</span>
+                        </div>
+                    </div>
+
+                    <div class="tab-strip" data-tabs="alarm-tabs">
+                        <button class="active" data-section="alarm-overview" onclick="switchSubnav(event, 'alarm-tabs', 'alarm-overview')">总览面板</button>
+                        <button data-section="alarm-realtime" onclick="switchSubnav(event, 'alarm-tabs', 'alarm-realtime')">实时告警</button>
+                        <button data-section="alarm-analysis" onclick="switchSubnav(event, 'alarm-tabs', 'alarm-analysis')">统计分析</button>
+                        <button data-section="alarm-dispatch" onclick="switchSubnav(event, 'alarm-tabs', 'alarm-dispatch')">事件分派</button>
+                        <button data-section="alarm-knowledge" onclick="switchSubnav(event, 'alarm-tabs', 'alarm-knowledge')">知识库</button>
+                    </div>
+
+                    <div class="tab-section active" id="alarm-overview" data-section-parent="alarm-tabs">
+                        <div class="card-grid">
+                            <div class="card">
+                                <h3>告警级别分布</h3>
+                                <div class="metric warning">严重 1 · 重要 3 · 一般 2 · 提示 1</div>
+                                <div class="metric-desc">参考开源项目 open-falcon 级别定义。</div>
+                                <div class="metric-footer">近 24h 告警共 28 条，比上周下降 12%</div>
+                            </div>
+                            <div class="card">
+                                <h3>平均确认时间</h3>
+                                <div class="metric">5 min</div>
+                                <div class="metric-desc">基于 Alertmanager webhook + 工单联动。</div>
+                                <div class="metric-footer">目标 SLA：≤ 8 min | 历史最佳：3 min</div>
+                            </div>
+                            <div class="card">
+                                <h3>根因分类占比</h3>
+                                <div class="metric">电力 35% · 制冷 28% · 安全 22% · 其他 15%</div>
+                                <div class="metric-desc">开源 RCA 模型（Grafana + Loki 日志）结果。</div>
+                                <div class="metric-footer">排名第一根因：UPS 电池温度偏高</div>
+                            </div>
+                        </div>
+                        <div class="grid-two">
+                            <div class="card">
+                                <h3>告警趋势（小时粒度）</h3>
+                                <p class="metric-desc">图表占位：近 24 小时告警数量堆叠图（来源 Grafana Alert Panel）。</p>
+                                <div style="margin-top:12px;height:220px;border-radius:12px;border:1px dashed rgba(59,164,255,0.35);display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+                                    折线图占位：严重/重要/一般/提示 告警折线
+                                </div>
+                            </div>
+                            <div class="card">
+                                <h3>Top5 告警对象</h3>
+                                <table style="margin-top:12px;">
+                                    <thead>
+                                        <tr>
+                                            <th>对象</th>
+                                            <th>告警数</th>
+                                            <th>最近发生</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>UPS-02</td>
+                                            <td>5</td>
+                                            <td>2025-11-13 09:58</td>
+                                        </tr>
+                                        <tr>
+                                            <td>列间空调 A05</td>
+                                            <td>4</td>
+                                            <td>2025-11-13 09:16</td>
+                                        </tr>
+                                        <tr>
+                                            <td>冷通道门禁 B</td>
+                                            <td>3</td>
+                                            <td>2025-11-12 21:58</td>
+                                        </tr>
+                                        <tr>
+                                            <td>烟感传感器-07</td>
+                                            <td>2</td>
+                                            <td>2025-11-12 17:22</td>
+                                        </tr>
+                                        <tr>
+                                            <td>温湿度传感器-18</td>
+                                            <td>2</td>
+                                            <td>2025-11-12 15:10</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="alarm-realtime" data-section-parent="alarm-tabs">
+                        <div class="filter-row">
+                            <span class="filter-chip">级别：全部</span>
+                            <span class="filter-chip">确认状态：未确认</span>
+                            <span class="filter-chip">来源：动环设备</span>
+                            <span class="filter-chip">时间范围：近 3 小时</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>告警名称</th>
+                                        <th>级别</th>
+                                        <th>设备</th>
+                                        <th>产生时间</th>
+                                        <th>确认状态</th>
+                                        <th>处理</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>[严重] UPS 电池组温度过高</td>
+                                        <td><span class="tag error">严重</span></td>
+                                        <td>UPS-02</td>
+                                        <td>2025-11-13 09:58</td>
+                                        <td><span class="tag warn">未确认</span></td>
+                                        <td><span class="tag info">派单</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>[重要] 机柜 E01 漏水告警</td>
+                                        <td><span class="tag warn">重要</span></td>
+                                        <td>漏水探测器-01</td>
+                                        <td>2025-11-13 10:42</td>
+                                        <td><span class="tag info">已确认</span></td>
+                                        <td><span class="tag info">复核</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>[一般] 空调回风温度偏高</td>
+                                        <td><span class="tag warn">一般</span></td>
+                                        <td>空调 A05</td>
+                                        <td>2025-11-13 09:16</td>
+                                        <td><span class="tag info">已确认</span></td>
+                                        <td><span class="tag ok">处理中</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>[提示] 门禁多次验证失败</td>
+                                        <td><span class="tag info">提示</span></td>
+                                        <td>主入口门禁</td>
+                                        <td>2025-11-13 08:33</td>
+                                        <td><span class="tag info">已确认</span></td>
+                                        <td><span class="tag info">录像</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="alarm-analysis" data-section-parent="alarm-tabs">
+                        <div class="card-grid">
+                            <div class="card">
+                                <h3>告警闭环率</h3>
+                                <div class="metric success">92%</div>
+                                <div class="metric-desc">来源：开源工单系统（Zammad) + Alertmanager。</div>
+                                <div class="metric-footer">目标 ≥ 95% ｜ 剩余未闭环：4 条</div>
+                            </div>
+                            <div class="card">
+                                <h3>平均修复时间 (MTTR)</h3>
+                                <div class="metric">26 min</div>
+                                <div class="metric-desc">近 7 天平均，较同期改善 12%。</div>
+                                <div class="metric-footer">最佳记录：制冷团队 18 min</div>
+                            </div>
+                            <div class="card">
+                                <h3>预测性告警命中率</h3>
+                                <div class="metric warning">68%</div>
+                                <div class="metric-desc">AI 模型识别潜在故障较真实事件比值。</div>
+                                <div class="metric-footer">目标 75% ｜ 需优化训练样本</div>
+                            </div>
+                        </div>
+                        <div class="grid-two">
+                            <div class="card">
+                                <h3>告警热力图</h3>
+                                <p class="metric-desc">参考 Grafana Heatmap 展示 7x24 告警密度（占位）。</p>
+                                <div style="margin-top:12px;height:220px;border-radius:12px;border:1px dashed rgba(59,164,255,0.35);display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+                                    热力图占位：横轴时间 ｜ 纵轴系统 ｜ 颜色表示数量
+                                </div>
+                            </div>
+                            <div class="card">
+                                <h3>根因分析报告</h3>
+                                <ul style="margin-top:14px;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--text-muted);list-style:disc;padding-left:18px;">
+                                    <li>UPS 电池温度受环境温度提升影响，建议联动空调策略。</li>
+                                    <li>门禁多次失败来自访客账号权限设置，需优化审批流程。</li>
+                                    <li>冷通道热偏差与空调 A05 滤网压差升高相关。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="alarm-dispatch" data-section-parent="alarm-tabs">
+                        <div class="filter-row">
+                            <span class="filter-chip">派单平台：Zammad</span>
+                            <span class="filter-chip">待接单：2</span>
+                            <span class="filter-chip">进行中：3</span>
+                            <span class="filter-chip">已完成：18 (本周)</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>工单号</th>
+                                        <th>告警</th>
+                                        <th>责任组</th>
+                                        <th>接单人</th>
+                                        <th>优先级</th>
+                                        <th>目标完成</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>WO-20251113-001</td>
+                                        <td>UPS 电池温度过高</td>
+                                        <td>电力运维</td>
+                                        <td>赵鹏</td>
+                                        <td><span class="tag error">紧急</span></td>
+                                        <td>2025-11-13 14:00</td>
+                                        <td><span class="tag warn">进行中</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>WO-20251113-002</td>
+                                        <td>列间空调 A05 回风偏高</td>
+                                        <td>制冷维护</td>
+                                        <td>刘凯</td>
+                                        <td><span class="tag warn">高</span></td>
+                                        <td>2025-11-13 18:00</td>
+                                        <td><span class="tag warn">待处理</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>WO-20251112-004</td>
+                                        <td>门禁多次失败</td>
+                                        <td>安全管理</td>
+                                        <td>王楠</td>
+                                        <td><span class="tag info">中</span></td>
+                                        <td>2025-11-13 12:00</td>
+                                        <td><span class="tag ok">已完成</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="alarm-knowledge" data-section-parent="alarm-tabs">
+                        <div class="card">
+                            <h3>告警知识库摘要</h3>
+                            <p class="metric-desc">基于开源文档平台（Wiki.js）整理的标准处理 SOP。</p>
+                            <ul style="margin-top:12px;display:flex;flex-direction:column;gap:12px;font-size:13px;color:var(--text-muted);">
+                                <li><strong>UPS 电池温度过高</strong>：检查空调送风、查看电池均衡情况、执行放电测试。</li>
+                                <li><strong>机柜漏水</strong>：确认漏水探头位置、启动排水系统、检查冷凝水管路。</li>
+                                <li><strong>门禁多次失败</strong>：核实人员身份、回放联动视频、根据策略进行远程授权或锁定。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="content-page" id="page-history-center">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">历史中心</h2>
+                            <div class="meta-line">
+                                <span>数据湖：InfluxDB + Loki 日志 + MinIO 媒体</span>
+                                <span>覆盖：告警、设备、门禁、抓拍、系统日志</span>
+                            </div>
+                        </div>
+                        <span class="pill info">数据可追溯</span>
+                    </div>
+
+                    <div class="tab-strip" data-tabs="history-tabs">
+                        <button class="active" data-section="history-alarm-log" onclick="switchSubnav(event, 'history-tabs', 'history-alarm-log')">告警记录</button>
+                        <button data-section="history-device-data" onclick="switchSubnav(event, 'history-tabs', 'history-device-data')">设备数据</button>
+                        <button data-section="history-access" onclick="switchSubnav(event, 'history-tabs', 'history-access')">门禁记录</button>
+                        <button data-section="history-capture" onclick="switchSubnav(event, 'history-tabs', 'history-capture')">历史抓拍</button>
+                        <button data-section="history-system" onclick="switchSubnav(event, 'history-tabs', 'history-system')">系统日志</button>
+                    </div>
+
+                    <div class="tab-section active" id="history-alarm-log" data-section-parent="history-tabs">
+                        <div class="filter-row">
+                            <span class="filter-chip">时间：2025-11-06 ~ 2025-11-13</span>
+                            <span class="filter-chip">确认状态：全部</span>
+                            <span class="filter-chip">导出：CSV / PDF</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>告警名称</th>
+                                        <th>级别</th>
+                                        <th>产生时间</th>
+                                        <th>结束时间</th>
+                                        <th>确认人</th>
+                                        <th>确认时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>[重要] UPS 电池温度过高</td>
+                                        <td><span class="tag error">重要</span></td>
+                                        <td>2025-11-12 21:05</td>
+                                        <td>2025-11-12 21:18</td>
+                                        <td>admin</td>
+                                        <td>21:20</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>[一般] 底座漏水探测</td>
+                                        <td><span class="tag warn">一般</span></td>
+                                        <td>2025-11-11 14:03</td>
+                                        <td>2025-11-11 14:40</td>
+                                        <td>ops01</td>
+                                        <td>14:22</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>[重要] 机柜门未关</td>
+                                        <td><span class="tag error">重要</span></td>
+                                        <td>2025-11-10 18:25</td>
+                                        <td>2025-11-10 18:27</td>
+                                        <td>ops02</td>
+                                        <td>18:28</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="history-device-data" data-section-parent="history-tabs">
+                        <div class="card">
+                            <h3>关键设备数据 · 趋势</h3>
+                            <p class="metric-desc">图表占位：引用开源 Grafana Dashboard 展示电力/温湿度曲线。</p>
+                            <div style="margin-top:12px;height:220px;border-radius:12px;border:1px dashed rgba(59,164,255,0.35);display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+                                多条趋势图占位：UPS 输入电压、温度、负载等
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="history-access" data-section-parent="history-tabs">
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>人员</th>
+                                        <th>权限组</th>
+                                        <th>门点</th>
+                                        <th>结果</th>
+                                        <th>备注</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2025-11-13 08:33</td>
+                                        <td>王俊</td>
+                                        <td>值班-夜班</td>
+                                        <td>主入口</td>
+                                        <td><span class="tag ok">通过</span></td>
+                                        <td>夜间巡检</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2025-11-12 21:18</td>
+                                        <td>李敏</td>
+                                        <td>访客-临时</td>
+                                        <td>外部门禁</td>
+                                        <td><span class="tag warn">待确认</span></td>
+                                        <td>需二次验证</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="history-capture" data-section-parent="history-tabs">
+                        <div class="card">
+                            <h3>历史抓拍</h3>
+                            <p class="metric-desc">来自开源录像管理 (Shinobi) 的时间线截图。</p>
+                            <div class="timeline" style="margin-top:14px;">
+                                <div class="timeline-item">
+                                    <strong>2025-11-13 10:42</strong>
+                                    <p class="note">机柜 E01 漏水联动抓拍，已存入证据库。</p>
+                                </div>
+                                <div class="timeline-item">
+                                    <strong>2025-11-12 21:58</strong>
+                                    <p class="note">门禁多次失败录像，自动打标签“可疑”。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="history-system" data-section-parent="history-tabs">
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>用户</th>
+                                        <th>操作</th>
+                                        <th>详情</th>
+                                        <th>结果</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2025-11-13 08:00</td>
+                                        <td>admin</td>
+                                        <td>系统登录</td>
+                                        <td>Web 控制台登录成功</td>
+                                        <td><span class="tag ok">成功</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2025-11-12 21:20</td>
+                                        <td>ops01</td>
+                                        <td>告警确认</td>
+                                        <td>UPS 电池温度过高</td>
+                                        <td><span class="tag ok">成功</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="content-page" id="page-settings-center">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">设置中心</h2>
+                            <div class="meta-line">
+                                <span>架构参考：开源配置平台 Vue-Element-Admin / Django Admin</span>
+                                <span>涵盖：告警告知、告警配置、门禁设置、权限等</span>
+                            </div>
+                        </div>
+                        <span class="pill info">配置最新</span>
+                    </div>
+
+                    <div class="tab-strip" data-tabs="settings-tabs">
+                        <button class="active" data-section="settings-notice" onclick="switchSubnav(event, 'settings-tabs', 'settings-notice')">告警告知</button>
+                        <button data-section="settings-alarm" onclick="switchSubnav(event, 'settings-tabs', 'settings-alarm')">告警配置</button>
+                        <button data-section="settings-door" onclick="switchSubnav(event, 'settings-tabs', 'settings-door')">门禁设置</button>
+                        <button data-section="settings-role" onclick="switchSubnav(event, 'settings-tabs', 'settings-role')">权限设置</button>
+                        <button data-section="settings-page" onclick="switchSubnav(event, 'settings-tabs', 'settings-page')">页面配置</button>
+                        <button data-section="settings-language" onclick="switchSubnav(event, 'settings-tabs', 'settings-language')">语言配置</button>
+                        <button data-section="settings-north" onclick="switchSubnav(event, 'settings-tabs', 'settings-north')">北向连接</button>
+                        <button data-section="settings-backup" onclick="switchSubnav(event, 'settings-tabs', 'settings-backup')">备份还原</button>
+                        <button data-section="settings-system" onclick="switchSubnav(event, 'settings-tabs', 'settings-system')">系统设置</button>
+                    </div>
+
+                    <div class="tab-section active" id="settings-notice" data-section-parent="settings-tabs">
+                        <div class="card">
+                            <h3>通知方式设置</h3>
+                            <p class="metric-desc">参考开源项目 Zabbix / Alertmanager 的多通道通知配置。</p>
+                            <div class="form-grid" style="margin-top:16px;">
+                                <div>
+                                    <label>邮箱地址</label>
+                                    <input type="email" placeholder="example@company.com">
+                                </div>
+                                <div>
+                                    <label>SMTP 服务器</label>
+                                    <input type="text" value="smtp.qq.com">
+                                </div>
+                                <div>
+                                    <label>端口</label>
+                                    <input type="text" value="465">
+                                </div>
+                                <div>
+                                    <label>账号</label>
+                                    <input type="text" value="alert@company.com">
+                                </div>
+                                <div>
+                                    <label>授权码</label>
+                                    <input type="password" value="******">
+                                </div>
+                                <div>
+                                    <label>短信网关</label>
+                                    <input type="text" placeholder="https://.../api/sms">
+                                </div>
+                            </div>
+                            <div class="btn-row">
+                                <button class="btn-primary">保存设置</button>
+                                <button class="btn-ghost">发送测试通知</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="settings-alarm" data-section-parent="settings-tabs">
+                        <div class="card">
+                            <h3>告警配置</h3>
+                            <div class="tab-strip" data-tabs="alarm-config-tabs" style="margin-top:16px;">
+                                <button class="active" data-section="config-type" onclick="switchSubnav(event, 'alarm-config-tabs', 'config-type')">告警类型</button>
+                                <button data-section="config-param" onclick="switchSubnav(event, 'alarm-config-tabs', 'config-param')">告警参数</button>
+                                <button data-section="config-content" onclick="switchSubnav(event, 'alarm-config-tabs', 'config-content')">告警内容</button>
+                                <button data-section="config-voice" onclick="switchSubnav(event, 'alarm-config-tabs', 'config-voice')">语音播报</button>
+                            </div>
+                            <div class="tab-section active" id="config-type" data-section-parent="alarm-config-tabs" style="margin-top:16px;">
+                                <div class="table-wrapper">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>类型名称</th>
+                                                <th>级别</th>
+                                                <th>适用设备</th>
+                                                <th>默认通知</th>
+                                                <th>启用</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>电源异常</td>
+                                                <td><span class="tag error">严重</span></td>
+                                                <td>UPS / 配电柜</td>
+                                                <td>短信 + 邮件</td>
+                                                <td><span class="tag ok">启用</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>温湿度超限</td>
+                                                <td><span class="tag warn">重要</span></td>
+                                                <td>环境传感器</td>
+                                                <td>邮件</td>
+                                                <td><span class="tag ok">启用</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="tab-section" id="config-param" data-section-parent="alarm-config-tabs" style="margin-top:16px;">
+                                <div class="form-grid">
+                                    <div>
+                                        <label>温度上限 (℃)</label>
+                                        <input type="number" value="28">
+                                    </div>
+                                    <div>
+                                        <label>温度下限 (℃)</label>
+                                        <input type="number" value="18">
+                                    </div>
+                                    <div>
+                                        <label>湿度上限 (%)</label>
+                                        <input type="number" value="65">
+                                    </div>
+                                    <div>
+                                        <label>湿度下限 (%)</label>
+                                        <input type="number" value="40">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-section" id="config-content" data-section-parent="alarm-config-tabs" style="margin-top:16px;">
+                                <label>模板内容</label>
+                                <textarea placeholder="示例：{设备名称} 于 {告警时间} 产生 {告警内容}，请尽快处理。"></textarea>
+                            </div>
+                            <div class="tab-section" id="config-voice" data-section-parent="alarm-config-tabs" style="margin-top:16px;">
+                                <div class="form-grid">
+                                    <div>
+                                        <label>播报语言</label>
+                                        <select>
+                                            <option>中文（普通话）</option>
+                                            <option>英文</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>播报音量</label>
+                                        <input type="range" min="0" max="100" value="70">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="settings-door" data-section-parent="settings-tabs">
+                        <div class="card">
+                            <h3>门禁策略</h3>
+                            <div class="form-grid" style="margin-top:16px;">
+                                <div>
+                                    <label>访客审批时限 (分钟)</label>
+                                    <input type="number" value="30">
+                                </div>
+                                <div>
+                                    <label>夜间自动锁门时间</label>
+                                    <input type="time" value="22:00">
+                                </div>
+                                <div>
+                                    <label>多次失败触发阈值</label>
+                                    <input type="number" value="3">
+                                </div>
+                            </div>
+                            <div class="btn-row">
+                                <button class="btn-primary">保存策略</button>
+                                <button class="btn-ghost">导出门禁日志</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="settings-role" data-section-parent="settings-tabs">
+                        <div class="card">
+                            <h3>权限矩阵</h3>
+                            <p class="metric-desc">参考开源 RBAC 模型（Keycloak / Casbin）。</p>
+                            <div class="table-wrapper" style="margin-top:16px;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>角色</th>
+                                            <th>可访问模块</th>
+                                            <th>操作权限</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>管理员</td>
+                                            <td>全部模块</td>
+                                            <td>查看 / 配置 / 派单 / 导出</td>
+                                        </tr>
+                                        <tr>
+                                            <td>运维工程师</td>
+                                            <td>总览、配电、制冷、告警</td>
+                                            <td>查看 / 确认告警 / 提交工单</td>
+                                        </tr>
+                                        <tr>
+                                            <td>访客</td>
+                                            <td>总览（简版）</td>
+                                            <td>只读</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="settings-page" data-section-parent="settings-tabs">
+                        <div class="card">
+                            <h3>页面布局</h3>
+                            <p class="metric-desc">基于开源动态看板（Grafana / ECharts）布局拖拽理念。</p>
+                            <div class="form-grid" style="margin-top:16px;">
+                                <div>
+                                    <label>首页布局模板</label>
+                                    <select>
+                                        <option>标准监控</option>
+                                        <option>安全优先</option>
+                                        <option>节能优先</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>默认时间范围</label>
+                                    <select>
+                                        <option>实时</option>
+                                        <option>近 24 小时</option>
+                                        <option>近 7 天</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="settings-language" data-section-parent="settings-tabs">
+                        <div class="card">
+                            <h3>语言配置</h3>
+                            <div class="form-grid" style="margin-top:16px;">
+                                <div>
+                                    <label>界面语言</label>
+                                    <select>
+                                        <option>中文（简体）</option>
+                                        <option>中文（繁體）</option>
+                                        <option>英文</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>告警播报语言</label>
+                                    <select>
+                                        <option>中文</option>
+                                        <option>英文</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="settings-north" data-section-parent="settings-tabs">
+                        <div class="card">
+                            <h3>北向连接</h3>
+                            <p class="metric-desc">支持对接第三方 BMS / DCIM 平台（Modbus / SNMP / MQTT）。</p>
+                            <div class="form-grid" style="margin-top:16px;">
+                                <div>
+                                    <label>北向协议</label>
+                                    <select>
+                                        <option>SNMP v3</option>
+                                        <option>RESTful</option>
+                                        <option>MQTT</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>目标地址</label>
+                                    <input type="text" value="https://api.partner.com/v1">
+                                </div>
+                                <div>
+                                    <label>访问密钥</label>
+                                    <input type="password" value="********">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="settings-backup" data-section-parent="settings-tabs">
+                        <div class="card">
+                            <h3>备份与还原</h3>
+                            <p class="metric-desc">参考开源备份工具 Restic / Velero 的备份策略。</p>
+                            <div class="btn-row" style="margin-top:16px;">
+                                <button class="btn-primary">立即备份</button>
+                                <button class="btn-ghost">导入备份文件</button>
+                            </div>
+                            <p class="note" style="margin-top:12px;">最近备份：2025-11-12 23:00 ｜ 备份大小：1.2 GB</p>
+                        </div>
+                    </div>
+
+                    <div class="tab-section" id="settings-system" data-section-parent="settings-tabs">
+                        <div class="card">
+                            <h3>系统设置</h3>
+                            <div class="tab-strip" data-tabs="system-config-tabs" style="margin-top:16px;">
+                                <button class="active" data-section="system-license" onclick="switchSubnav(event, 'system-config-tabs', 'system-license')">系统授权</button>
+                                <button data-section="system-time" onclick="switchSubnav(event, 'system-config-tabs', 'system-time')">系统时间</button>
+                                <button data-section="system-network" onclick="switchSubnav(event, 'system-config-tabs', 'system-network')">网络参数</button>
+                            </div>
+                            <div class="tab-section active" id="system-license" data-section-parent="system-config-tabs" style="margin-top:16px;">
+                                <div class="form-grid">
+                                    <div>
+                                        <label>授权编号</label>
+                                        <input type="text" value="YJ-OPS-2025-1101">
+                                    </div>
+                                    <div>
+                                        <label>授权截止</label>
+                                        <input type="date" value="2026-12-31">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-section" id="system-time" data-section-parent="system-config-tabs" style="margin-top:16px;">
+                                <div class="form-grid">
+                                    <div>
+                                        <label>系统时间</label>
+                                        <input type="datetime-local" value="2025-11-13T11:23">
+                                    </div>
+                                    <div>
+                                        <label>NTP 服务器</label>
+                                        <input type="text" value="ntp.aliyun.com">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-section" id="system-network" data-section-parent="system-config-tabs" style="margin-top:16px;">
+                                <div class="form-grid">
+                                    <div>
+                                        <label>IP 地址</label>
+                                        <input type="text" value="192.168.20.12">
+                                    </div>
+                                    <div>
+                                        <label>子网掩码</label>
+                                        <input type="text" value="255.255.255.0">
+                                    </div>
+                                    <div>
+                                        <label>默认网关</label>
+                                        <input type="text" value="192.168.20.1">
+                                    </div>
+                                    <div>
+                                        <label>DNS</label>
+                                        <input type="text" value="223.5.5.5">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function toggleSubmenu(event, submenuId) {
+            event.preventDefault();
+            const trigger = event.currentTarget;
+            const submenu = document.getElementById(submenuId);
+            const isOpen = submenu.classList.toggle('open');
+            trigger.classList.toggle('open', isOpen);
+        }
+
+        function openContent(event, pageId) {
+            if (event) {
+                event.preventDefault();
+            }
+            const sideButtons = document.querySelectorAll('.menu-btn[data-group="side"], .submenu-btn[data-group="side"]');
+            const topButtons = document.querySelectorAll('.top-action[data-group="top"]');
+
+            let targetButton = event ? event.currentTarget : document.querySelector(`[data-target="${pageId}"]`);
+            const group = targetButton ? targetButton.dataset.group : null;
+
+            if (group === 'side') {
+                sideButtons.forEach(btn => btn.classList.remove('active'));
+                if (targetButton) {
+                    targetButton.classList.add('active');
+                }
+                topButtons.forEach(btn => btn.classList.remove('active'));
+            } else if (group === 'top') {
+                topButtons.forEach(btn => btn.classList.remove('active'));
+                if (targetButton) {
+                    targetButton.classList.add('active');
+                }
+                sideButtons.forEach(btn => btn.classList.remove('active'));
+            } else {
+                sideButtons.forEach(btn => btn.classList.remove('active'));
+                topButtons.forEach(btn => btn.classList.remove('active'));
+                if (targetButton) {
+                    targetButton.classList.add('active');
+                }
+            }
+
+            document.querySelectorAll('.content-page').forEach(page => page.classList.remove('active'));
+            const pageNode = document.getElementById(`page-${pageId}`);
+            if (pageNode) {
+                pageNode.classList.add('active');
+            }
+
+            // 当切换到顶栏模块时，初始化其默认二级标签
+            if (pageId === 'alarm-center') {
+                switchSubnav(null, 'alarm-tabs', 'alarm-overview');
+            }
+            if (pageId === 'history-center') {
+                switchSubnav(null, 'history-tabs', 'history-alarm-log');
+            }
+            if (pageId === 'settings-center') {
+                switchSubnav(null, 'settings-tabs', 'settings-notice');
+                switchSubnav(null, 'alarm-config-tabs', 'config-type');
+                switchSubnav(null, 'system-config-tabs', 'system-license');
+            }
+        }
+
+        function switchSubnav(event, tabsId, sectionId) {
+            if (event) {
+                event.preventDefault();
+            }
+            const tabStrip = document.querySelector(`[data-tabs="${tabsId}"]`);
+            if (!tabStrip) {
+                return;
+            }
+            tabStrip.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.section === sectionId);
+            });
+            document.querySelectorAll(`[data-section-parent="${tabsId}"]`).forEach(panel => {
+                panel.classList.toggle('active', panel.id === sectionId);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            openContent(null, 'overview');
+        });
+
+        function togglePlatformMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('platformMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', () => {
+            const menu = document.getElementById('platformMenu');
+            if (menu) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
+

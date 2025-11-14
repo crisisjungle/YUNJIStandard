@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程模板选择 - 云基动环监控系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: "⚡";
+            font-size: 28px;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 500;
+            opacity: 0.95;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-link {
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            font-size: 14px;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .header-link:hover {
+            background: rgba(255, 255, 255, 0.28);
+            transform: translateY(-1px);
+        }
+
+        /* 主容器 */
+        .container {
+            width: 100%;
+            height: calc(1080px - 60px - 70px);
+            display: flex;
+            flex-direction: column;
+            padding: 15px 20px;
+            gap: 15px;
+            overflow: hidden;
+        }
+
+        /* 步骤指示器 */
+        .steps-indicator {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+        }
+
+        .steps-list {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .step-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .step-item.active .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .step-item.completed .step-number {
+            background: #198754;
+            color: white;
+        }
+
+        .step-item.completed .step-number::after {
+            content: "✓";
+        }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .step-item.active .step-title {
+            color: #667eea;
+        }
+
+        .steps-line {
+            position: absolute;
+            top: 25px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+
+        .steps-line-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        /* 步骤内容区域 */
+        .step-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 20px 25px;
+            flex: 1;
+            display: none;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-content-header {
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+            flex-shrink: 0;
+        }
+
+        .step-content-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+
+        .step-content-desc {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .step-content-body {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        /* 表单样式 */
+        .form-section {
+            margin-bottom: 15px;
+        }
+
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* 子步骤导航 */
+        .sub-steps-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .sub-step-btn {
+            padding: 10px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            background: white;
+            color: #7f8c8d;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sub-step-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .sub-step-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .sub-step-content {
+            display: none;
+        }
+
+        .sub-step-content.active {
+            display: block;
+        }
+
+        /* 驱动和策略列表 */
+        .match-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* 设备配置列表（无高度限制） */
+        .device-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        /* 联动策略列表高度调节 */
+        .strategy-list {
+            max-height: 420px;
+        }
+
+        .match-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 4px solid #198754;
+        }
+
+        /* 设备配置项 */
+        .device-item {
+            display: grid;
+            grid-template-columns: 150px 1fr 1fr 1fr 100px;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .device-item-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .device-item-icon {
+            font-size: 24px;
+        }
+
+        .device-item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .device-item-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .device-item-field-label {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-bottom: 4px;
+        }
+
+        .device-item-field-value {
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .match-item-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .match-item-icon {
+            font-size: 24px;
+        }
+
+        .match-item-info {
+            flex: 1;
+        }
+
+        .match-item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .match-item-desc {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .match-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        .btn-secondary:hover {
+            background: #d5dbdb;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* 组态模板卡片 */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            height: 100%;
+            align-content: start;
+        }
+
+        .template-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .template-card.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .template-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .template-card-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .template-card-icon {
+            font-size: 32px;
+        }
+
+        .template-card-desc {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .template-pages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .page-tag {
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .template-card.selected .page-tag {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        /* 组态页选项 */
+        #pageSelection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .page-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .page-option:hover {
+            border-color: #667eea;
+        }
+
+        .page-option-icon {
+            font-size: 20px;
+        }
+
+        .page-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .page-option.selected {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+        }
+
+        .page-option-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 阈值配置弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            width: 1200px;
+            max-width: 90%;
+            height: 760px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .modal-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .device-tree {
+            width: 320px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+            padding: 18px;
+        }
+
+        .device-tree h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+
+        .tree-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .tree-item {
+            margin-bottom: 10px;
+        }
+
+        .tree-item > .tree-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .tree-children {
+            margin-left: 18px;
+            margin-top: 8px;
+            border-left: 1px dashed #dfe6e9;
+            padding-left: 12px;
+        }
+
+        .tree-leaf {
+            font-size: 13px;
+            color: #52616b;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .tree-leaf:hover {
+            color: #667eea;
+        }
+
+        .threshold-panel {
+            flex: 1;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .threshold-panel-header {
+            margin-bottom: 16px;
+        }
+
+        .threshold-panel-header h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .threshold-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .threshold-table th,
+        .threshold-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 14px;
+        }
+
+        .threshold-table th {
+            background: #f5f7fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .threshold-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .threshold-input {
+            width: 120px;
+            padding: 8px 10px;
+            border: 1px solid #dfe6e9;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .threshold-actions {
+            margin-top: 16px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 底部操作栏 */
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px 25px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            height: 70px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-large {
+            padding: 12px 30px;
+            font-size: 15px;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">云基动环监控系统</div>
+            <div class="page-title">工程模板选择</div>
+        </div>
+        <div class="header-right">
+            <a class="header-link" href="02-调试自检界面.html">进入调试平台</a>
+            <div class="user-info">
+                <span>👤</span>
+                <span>管理员</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 阈值配置弹窗 -->
+    <div class="modal-overlay" id="thresholdModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">告警阈值配置</div>
+                <button class="modal-close" id="thresholdModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="device-tree">
+                    <h4>设备清单</h4>
+                    <ul class="tree-list">
+                        <li class="tree-item">
+                            <div class="tree-label">📁 MC4.0</div>
+                            <div class="tree-children">
+                                <div class="tree-item">
+                                    <div class="tree-label">📁 测试</div>
+                                    <div class="tree-children">
+                                        <div class="tree-leaf">🧩 机柜IO模块</div>
+                                        <div class="tree-leaf">🧩 通用门指纹读卡器</div>
+                                        <div class="tree-leaf">🧩 指纹读卡器</div>
+                                        <div class="tree-item">
+                                            <div class="tree-label">📁 CACS控制器</div>
+                                            <div class="tree-children">
+                                                <div class="tree-leaf">🧩 CACS-门1</div>
+                                                <div class="tree-leaf">🧩 CACS-门2</div>
+                                            </div>
+                                        </div>
+                                        <div class="tree-item">
+                                            <div class="tree-label">📁 电池柜</div>
+                                            <div class="tree-children">
+                                                <div class="tree-leaf">🧩 电池组</div>
+                                            </div>
+                                        </div>
+                                        <div class="tree-item">
+                                            <div class="tree-label">📁 管控柜</div>
+                                            <div class="tree-children">
+                                                <div class="tree-leaf">🧩 采集器IO</div>
+                                                <div class="tree-leaf">🧩 资产主机</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="threshold-panel">
+                    <div class="threshold-panel-header">
+                        <h4>测点告警阈值</h4>
+                        <div style="color: #7f8c8d; font-size: 13px;">可针对每个测点设置过高/过低阈值，支持数值输入</div>
+                    </div>
+                    <div style="overflow: auto;">
+                        <table class="threshold-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">序号</th>
+                                    <th style="width: 160px;">设备点</th>
+                                    <th>测点名称</th>
+                                    <th style="width: 160px;">过高阈值</th>
+                                    <th style="width: 160px;">过低阈值</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>在线点</td>
+                                    <td>通信状态</td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>门磁1</td>
+                                    <td>前门状态</td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>按钮1</td>
+                                    <td>紧急按钮</td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>温度</td>
+                                    <td>机柜温度</td>
+                                    <td><input class="threshold-input" type="number" placeholder="30"></td>
+                                    <td><input class="threshold-input" type="number" placeholder="18"></td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>烟感</td>
+                                    <td>烟雾浓度</td>
+                                    <td><input class="threshold-input" type="number" placeholder="60"></td>
+                                    <td><input class="threshold-input" type="number" placeholder="10"></td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>水浸</td>
+                                    <td>漏水检测</td>
+                                    <td><input class="threshold-input" type="number" placeholder="80"></td>
+                                    <td><input class="threshold-input" type="number" placeholder="0"></td>
+                                </tr>
+                                <tr>
+                                    <td>7</td>
+                                    <td>预留DI1</td>
+                                    <td>扩展输入1</td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                </tr>
+                                <tr>
+                                    <td>8</td>
+                                    <td>预留DO1</td>
+                                    <td>扩展输出1</td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                    <td><input class="threshold-input" type="number" placeholder="--"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="threshold-actions">
+                        <button class="btn btn-secondary" onclick="closeThresholdModal()">取消</button>
+                        <button class="btn btn-primary" onclick="saveThresholds()">保存修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 步骤指示器 -->
+        <div class="steps-indicator">
+            <div class="steps-list">
+                <div class="steps-line">
+                    <div class="steps-line-fill" id="stepsLineFill"></div>
+                </div>
+                <div class="step-item active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-title">机柜信息录入</div>
+                </div>
+                <div class="step-item" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-title">工程文件确认</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤1: 机柜信息录入 -->
+        <div class="step-content active" id="step1">
+            <div class="step-content-body">
+                <form id="cabinetInfoForm">
+                <!-- 项目类型 -->
+                <div class="form-section">
+                    <div class="form-section-title">📦 项目类型</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">项目类型</label>
+                            <select class="form-select" name="projectType" required>
+                                <option value="">请选择</option>
+                                <option value="module">微模块</option>
+                                <option value="cabinet">一体柜</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">机柜数量</label>
+                            <input type="number" class="form-input" name="cabinetCount" min="1" required placeholder="请输入机柜数量">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 空调信息 -->
+                <div class="form-section">
+                    <div class="form-section-title">❄️ 空调配置</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">空调数量</label>
+                            <input type="number" class="form-input" name="airconCount" min="0" required placeholder="请输入空调数量">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">空调型号</label>
+                            <select class="form-select" name="airconModel" required>
+                                <option value="">请选择</option>
+                                <option value="rack">机架式空调</option>
+                                <option value="row">列间空调</option>
+                                <option value="room">机房空调</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 电池信息 -->
+                <div class="form-section">
+                    <div class="form-section-title">🔋 电池配置</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">电池数量</label>
+                            <input type="number" class="form-input" name="batteryCount" min="0" required placeholder="请输入电池数量">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">电池型号</label>
+                            <select class="form-select" name="batteryModel" required>
+                                <option value="">请选择</option>
+                                <option value="12v-7ah">12V 7AH</option>
+                                <option value="12v-12ah">12V 12AH</option>
+                                <option value="48v-12ah">48V 12AH</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UPS和配电 -->
+                <div class="form-section">
+                    <div class="form-section-title">⚡ 电源配置</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">UPS型号</label>
+                            <select class="form-select" name="upsModel" required>
+                                <option value="">请选择</option>
+                                <option value="ups-1kva">UPS 1KVA</option>
+                                <option value="ups-3kva">UPS 3KVA</option>
+                                <option value="ups-6kva">UPS 6KVA</option>
+                                <option value="ups-10kva">UPS 10KVA</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">配电柜型号</label>
+                            <select class="form-select" name="pduModel" required>
+                                <option value="">请选择</option>
+                                <option value="pdu-basic">基础型PDU</option>
+                                <option value="pdu-smart">智能型PDU</option>
+                                <option value="pdu-meter">计量型PDU</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 配件选择 -->
+                <div class="form-section">
+                    <div class="form-section-title">🎨 配件选择</div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="rgb" name="accessories" value="rgb">
+                            <label for="rgb">RGB灯带</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="alarm" name="accessories" value="alarm">
+                            <label for="alarm">声光报警器</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 单模块选择 -->
+                <div class="form-section">
+                    <div class="form-section-title">📱 单模块选择</div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="app" name="modules" value="app">
+                            <label for="app">APP</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="asset" name="modules" value="asset">
+                            <label for="asset">资产</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="access" name="modules" value="access">
+                            <label for="access">门禁</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="video" name="modules" value="video">
+                            <label for="video">视频</label>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 步骤2: 工程文件确认 -->
+        <div class="step-content" id="step2">
+            <div class="step-content-header">
+                <div class="step-content-title">工程文件确认</div>
+                <div class="step-content-desc">请依次确认设备配置、联动策略、告警规则和组态模板</div>
+            </div>
+            <div class="step-content-body">
+                <!-- 子步骤导航 -->
+                <div class="sub-steps-nav">
+                    <button class="sub-step-btn active" onclick="switchSubStep(1)">设备配置</button>
+                    <button class="sub-step-btn" onclick="switchSubStep(2)">联动策略</button>
+                    <button class="sub-step-btn" onclick="switchSubStep(3)">告警规则</button>
+                    <button class="sub-step-btn" onclick="switchSubStep(4)">组态模板</button>
+                </div>
+
+                <!-- 子步骤1: 设备配置 -->
+                <div class="sub-step-content active" id="subStep1">
+                    <div class="form-section">
+                        <div class="form-section-title">🔌 设备配置</div>
+                        <div class="device-list" id="deviceList">
+                            <!-- 设备列表将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 子步骤2: 联动策略 -->
+                <div class="sub-step-content" id="subStep2">
+                    <div class="form-section">
+                        <div class="form-section-title">⚙️ 联动策略</div>
+                        <div class="match-list strategy-list" id="strategyList">
+                            <!-- 策略列表将通过JavaScript动态生成 -->
+                        </div>
+                        <button class="btn btn-outline" onclick="addStrategy()">+ 添加策略</button>
+                    </div>
+                </div>
+
+                <!-- 子步骤3: 告警规则 -->
+                <div class="sub-step-content" id="subStep3">
+                    <div class="form-section">
+                        <div class="form-section-title">🚨 告警规则</div>
+                        <div class="template-grid" id="alarmTemplateGrid">
+                            <div class="template-card" onclick="selectAlarmTemplate('loose')">
+                                <div class="template-card-header">
+                                    <div class="template-card-name">宽松模式</div>
+                                    <div class="template-card-icon">🌊</div>
+                                </div>
+                                <div class="template-card-desc">
+                                    使用较为宽松的告警阈值，减少误报情况，适合对告警频率有控制要求的场景
+                                </div>
+                            </div>
+
+                            <div class="template-card" onclick="selectAlarmTemplate('default')">
+                                <div class="template-card-header">
+                                    <div class="template-card-name">默认模板</div>
+                                    <div class="template-card-icon">📋</div>
+                                </div>
+                                <div class="template-card-desc">
+                                    使用系统默认的告警阈值配置，适用于大多数标准场景，提供平衡的告警灵敏度
+                                </div>
+                            </div>
+
+                            <div class="template-card" onclick="selectAlarmTemplate('strict')">
+                                <div class="template-card-header">
+                                    <div class="template-card-name">严格模式</div>
+                                    <div class="template-card-icon">🔒</div>
+                                </div>
+                                <div class="template-card-desc">
+                                    采用更严格的告警阈值，对异常情况更加敏感，适合对稳定性要求极高的关键设备场景
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; text-align: center;">
+                            <button class="btn btn-primary btn-large" onclick="modifyThresholds()">修改阈值</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 子步骤4: 组态模板 -->
+                <div class="sub-step-content" id="subStep4">
+                    <!-- 组态页选项 -->
+                    <div class="form-section">
+                        <div class="form-section-title">📄 组态页选择</div>
+                        <div class="checkbox-group" id="pageSelection">
+                            <label class="page-option" for="page-overview">
+                                <div class="page-option-content">
+                                    <span class="page-option-icon">📊</span>
+                                    <span>总览</span>
+                                </div>
+                                <input type="checkbox" id="page-overview" name="pages" value="overview" checked>
+                            </label>
+                            <label class="page-option" for="page-power">
+                                <div class="page-option-content">
+                                    <span class="page-option-icon">⚡</span>
+                                    <span>配电</span>
+                                </div>
+                                <input type="checkbox" id="page-power" name="pages" value="power" checked>
+                            </label>
+                            <label class="page-option" for="page-cooling">
+                                <div class="page-option-content">
+                                    <span class="page-option-icon">❄️</span>
+                                    <span>制冷</span>
+                                </div>
+                                <input type="checkbox" id="page-cooling" name="pages" value="cooling" checked>
+                            </label>
+                            <label class="page-option" for="page-eco">
+                                <div class="page-option-content">
+                                    <span class="page-option-icon">🌱</span>
+                                    <span>ECO</span>
+                                </div>
+                                <input type="checkbox" id="page-eco" name="pages" value="eco" checked>
+                            </label>
+                            <label class="page-option" for="page-asset">
+                                <div class="page-option-content">
+                                    <span class="page-option-icon">📦</span>
+                                    <span>资产</span>
+                                </div>
+                                <input type="checkbox" id="page-asset" name="pages" value="asset" checked>
+                            </label>
+                            <label class="page-option" for="page-protection">
+                                <div class="page-option-content">
+                                    <span class="page-option-icon">🛡️</span>
+                                    <span>防护</span>
+                                </div>
+                                <input type="checkbox" id="page-protection" name="pages" value="protection" checked>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 组态模板选择 -->
+                    <div class="form-section" style="margin-top: 30px;">
+                        <div class="form-section-title">🎨 组态模板选择</div>
+                        <div class="template-grid">
+                            <div class="template-card" onclick="selectTemplate('simple')">
+                                <div class="template-card-header">
+                                    <div class="template-card-name">简约型</div>
+                                    <div class="template-card-icon">🎨</div>
+                                </div>
+                                <div class="template-card-desc">
+                                    简约型模板采用极简设计理念，界面清爽简洁，色彩搭配和谐统一。专注于核心监控数据的展示，去除冗余信息，让用户能够快速获取关键指标。适合对界面简洁度要求较高的场景，提供流畅的视觉体验和高效的信息获取方式。界面布局合理，操作直观，适合日常快速巡检和基础监控需求。
+                                </div>
+                                <div class="template-pages" id="simple-pages">
+                                    <span class="page-tag">总览</span>
+                                    <span class="page-tag">配电</span>
+                                    <span class="page-tag">制冷</span>
+                                    <span class="page-tag">ECO</span>
+                                    <span class="page-tag">资产</span>
+                                    <span class="page-tag">防护</span>
+                                </div>
+                            </div>
+
+                            <div class="template-card" onclick="selectTemplate('standard')">
+                                <div class="template-card-header">
+                                    <div class="template-card-name">标准型</div>
+                                    <div class="template-card-icon">📊</div>
+                                </div>
+                                <div class="template-card-desc">
+                                    标准型模板遵循行业标准设计规范，功能模块完整，数据展示全面。提供丰富的图表类型和数据分析工具，支持多维度数据对比和历史趋势分析。界面布局科学合理，信息层次清晰，适合大多数企业级项目使用。包含完整的告警管理、报表生成、数据导出等标准功能，满足日常运维管理的全面需求。
+                                </div>
+                                <div class="template-pages" id="standard-pages">
+                                    <span class="page-tag">总览</span>
+                                    <span class="page-tag">配电</span>
+                                    <span class="page-tag">制冷</span>
+                                    <span class="page-tag">ECO</span>
+                                    <span class="page-tag">资产</span>
+                                    <span class="page-tag">防护</span>
+                                </div>
+                            </div>
+
+                            <div class="template-card" onclick="selectTemplate('professional')">
+                                <div class="template-card-header">
+                                    <div class="template-card-name">专业型</div>
+                                    <div class="template-card-icon">🏛️</div>
+                                </div>
+                                <div class="template-card-desc">
+                                    专业型模板面向大型数据中心和复杂监控场景，提供最全面的功能模块和高级分析能力。包含深度数据分析、智能预测、能耗优化建议、故障诊断等高级功能。支持自定义仪表盘、多维度报表、数据挖掘和趋势预测。界面设计专业严谨，数据可视化效果出色，适合对监控深度和广度有高要求的专业用户和大型项目场景。
+                                </div>
+                                <div class="template-pages" id="professional-pages">
+                                    <span class="page-tag">总览</span>
+                                    <span class="page-tag">配电</span>
+                                    <span class="page-tag">制冷</span>
+                                    <span class="page-tag">ECO</span>
+                                    <span class="page-tag">资产</span>
+                                    <span class="page-tag">防护</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="action-bar">
+        <div class="action-info" id="actionInfo">
+            步骤 1 / 2
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-secondary btn-large" id="prevBtn" onclick="prevStep()" style="display: none;">上一步</button>
+            <button class="btn btn-primary btn-large" id="nextBtn" onclick="nextStep()">下一步</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 2;
+        let currentSubStep = 1;
+        const totalSubSteps = 4;
+        let selectedTemplate = null;
+        let formData = {};
+
+        // 初始化
+        function init() {
+            updateStepsLine();
+            updateActionInfo();
+            matchDevicesAndStrategies();
+            // 绑定组态页选择变化事件
+            setTimeout(() => {
+                const pageCheckboxes = document.querySelectorAll('#pageSelection input');
+                pageCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', updateTemplatePages);
+                });
+                // 初始化页面标签
+                updateTemplatePages();
+            }, 100);
+        }
+
+        // 切换子步骤
+        function switchSubStep(step) {
+            currentSubStep = step;
+            // 更新子步骤按钮
+            document.querySelectorAll('.sub-step-btn').forEach((btn, index) => {
+                btn.classList.remove('active');
+                if (index + 1 === step) {
+                    btn.classList.add('active');
+                }
+            });
+            // 更新子步骤内容
+            document.querySelectorAll('.sub-step-content').forEach((content, index) => {
+                content.classList.remove('active');
+                if (index + 1 === step) {
+                    content.classList.add('active');
+                }
+            });
+        }
+
+        // 下一步
+        function nextStep() {
+            if (currentStep === 1) {
+                // 验证第一步表单
+                const form = document.getElementById('cabinetInfoForm');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                // 保存表单数据
+                const formDataObj = new FormData(form);
+                formData = Object.fromEntries(formDataObj);
+                formData.accessories = Array.from(form.querySelectorAll('input[name="accessories"]:checked')).map(cb => cb.value);
+                formData.modules = Array.from(form.querySelectorAll('input[name="modules"]:checked')).map(cb => cb.value);
+                
+                // 自动匹配设备和策略
+                matchDevicesAndStrategies();
+            } else if (currentStep === 2) {
+                // 验证第二步：检查是否选择了组态模板
+                if (!selectedTemplate) {
+                    // 切换到组态模板子步骤
+                    switchSubStep(4);
+                    alert('请选择一个组态模板');
+                    return;
+                }
+                // 完成配置
+                completeConfiguration();
+                return;
+            }
+
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStepDisplay();
+                // 重置到第一个子步骤
+                if (currentStep === 2) {
+                    switchSubStep(1);
+                }
+            }
+        }
+
+        // 上一步
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepDisplay();
+            }
+        }
+
+        // 更新步骤显示
+        function updateStepDisplay() {
+            // 更新步骤指示器
+            document.querySelectorAll('.step-item').forEach((item, index) => {
+                const stepNum = index + 1;
+                item.classList.remove('active', 'completed');
+                if (stepNum < currentStep) {
+                    item.classList.add('completed');
+                } else if (stepNum === currentStep) {
+                    item.classList.add('active');
+                }
+            });
+
+            // 更新步骤内容
+            document.querySelectorAll('.step-content').forEach((content, index) => {
+                content.classList.remove('active');
+                if (index + 1 === currentStep) {
+                    content.classList.add('active');
+                }
+            });
+
+            // 更新按钮
+            document.getElementById('prevBtn').style.display = currentStep > 1 ? 'block' : 'none';
+            document.getElementById('nextBtn').textContent = currentStep === totalSteps ? '完成配置' : '下一步';
+
+            updateStepsLine();
+            updateActionInfo();
+        }
+
+        // 更新步骤线
+        function updateStepsLine() {
+            if (totalSteps > 1) {
+                const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+                document.getElementById('stepsLineFill').style.width = progress + '%';
+            } else {
+                document.getElementById('stepsLineFill').style.width = '100%';
+            }
+        }
+
+        // 更新操作信息
+        function updateActionInfo() {
+            document.getElementById('actionInfo').textContent = `步骤 ${currentStep} / ${totalSteps}`;
+        }
+
+        // 匹配设备和策略
+        function matchDevicesAndStrategies() {
+            // 渲染设备配置
+            renderDevices();
+
+            // 根据表单数据匹配策略
+            const strategies = [
+                {
+                    name: '机柜整体PUE',
+                    desc: '实时计算和监控机柜整体PUE值，优化能耗管理',
+                    icon: '📊',
+                    type: 'pue'
+                },
+                {
+                    name: 'IT设备功率',
+                    desc: '监控IT设备实时功率，进行功率分析和优化',
+                    icon: '💻',
+                    type: 'it-power'
+                },
+                {
+                    name: '照明控制',
+                    desc: '智能照明控制策略，根据环境光线自动调节',
+                    icon: '💡',
+                    type: 'lighting'
+                },
+                {
+                    name: '声光报警控制',
+                    desc: '告警触发声光报警器，提供多级报警响应',
+                    icon: '🚨',
+                    type: 'alarm-control'
+                },
+                {
+                    name: '前后门告警',
+                    desc: '监控前后门状态，异常开启时触发告警',
+                    icon: '🚪',
+                    type: 'door-alarm'
+                },
+                {
+                    name: 'RGB控制',
+                    desc: 'RGB灯带颜色变化和闪烁控制策略',
+                    icon: '🎨',
+                    type: 'rgb'
+                },
+                {
+                    name: 'UPS告警',
+                    desc: 'UPS异常自动告警和切换电源策略',
+                    icon: '⚡',
+                    type: 'ups-alarm'
+                }
+            ];
+
+            renderStrategies(strategies);
+        }
+
+        // 渲染设备列表
+        function renderDevices() {
+            const devices = [
+                {
+                    name: 'UPS',
+                    desc: '不间断电源设备',
+                    driver: 'UPS驱动 v2.1',
+                    info: '型号: UPS-3KVA | IP: 192.168.1.100',
+                    icon: '⚡',
+                    type: 'ups'
+                },
+                {
+                    name: '配电柜',
+                    desc: '配电控制柜',
+                    driver: '配电柜驱动 v1.5',
+                    info: '型号: PDU-Basic | 端口: COM3',
+                    icon: '🔌',
+                    type: 'pdu'
+                },
+                {
+                    name: '空调',
+                    desc: '机房空调设备',
+                    driver: '空调驱动 v2.0',
+                    info: '型号: 机架式空调 | IP: 192.168.1.101',
+                    icon: '❄️',
+                    type: 'aircon'
+                },
+                {
+                    name: 'PDU',
+                    desc: '电源分配单元',
+                    driver: 'PDU驱动 v1.8',
+                    info: '型号: PDU-Smart | IP: 192.168.1.102',
+                    icon: '🔋',
+                    type: 'pdu-device'
+                },
+                {
+                    name: '采集器',
+                    desc: '数据采集器',
+                    driver: '采集器驱动 v3.2',
+                    info: '型号: Collector-Pro | IP: 192.168.1.103',
+                    icon: '📡',
+                    type: 'collector'
+                }
+            ];
+
+            const list = document.getElementById('deviceList');
+            list.innerHTML = devices.map(device => `
+                <div class="device-item">
+                    <div class="device-item-header">
+                        <div class="device-item-icon">${device.icon}</div>
+                        <div class="device-item-name">${device.name}</div>
+                    </div>
+                    <div class="device-item-field">
+                        <div class="device-item-field-label">设备描述</div>
+                        <div class="device-item-field-value">${device.desc}</div>
+                    </div>
+                    <div class="device-item-field">
+                        <div class="device-item-field-label">设备驱动</div>
+                        <div class="device-item-field-value">${device.driver}</div>
+                    </div>
+                    <div class="device-item-field">
+                        <div class="device-item-field-label">设备信息</div>
+                        <div class="device-item-field-value">${device.info}</div>
+                    </div>
+                    <div class="match-item-actions">
+                        <button class="btn btn-secondary" onclick="editDevice('${device.type}', '${device.name}')">修改</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染策略列表
+        function renderStrategies(strategies) {
+            const list = document.getElementById('strategyList');
+            if (strategies.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 40px; color: #7f8c8d;">暂无匹配的策略</div>';
+                return;
+            }
+            list.innerHTML = strategies.map(strategy => `
+                <div class="match-item">
+                    <div class="match-item-header">
+                        <div class="match-item-icon">${strategy.icon}</div>
+                        <div class="match-item-info">
+                            <div class="match-item-name">${strategy.name}</div>
+                            <div class="match-item-desc">${strategy.desc}</div>
+                        </div>
+                    </div>
+                    <div class="match-item-actions">
+                        <button class="btn btn-secondary" onclick="editStrategy('${strategy.type}')">修改</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        let selectedAlarmTemplate = null;
+
+        // 选择告警模板
+        function selectAlarmTemplate(type) {
+            selectedAlarmTemplate = type;
+            // 更新告警模板卡片选中状态
+            document.querySelectorAll('#alarmTemplateGrid .template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        // 选择组态模板
+        function selectTemplate(type) {
+            selectedTemplate = type;
+            // 只更新组态模板卡片的选中状态
+            document.querySelectorAll('#subStep4 .template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            // 更新模板卡片中的页面标签
+            updateTemplatePages();
+        }
+
+        // 更新模板卡片中的页面标签
+        function updateTemplatePages() {
+            // 更新选中样式
+            document.querySelectorAll('#pageSelection .page-option').forEach(option => {
+                const input = option.querySelector('input[type="checkbox"]');
+                option.classList.toggle('selected', input.checked);
+            });
+
+            const selectedPages = Array.from(document.querySelectorAll('#pageSelection input:checked')).map(cb => {
+                const labels = {
+                    'overview': '总览',
+                    'power': '配电',
+                    'cooling': '制冷',
+                    'eco': 'ECO',
+                    'asset': '资产',
+                    'protection': '防护'
+                };
+                return labels[cb.value];
+            });
+
+            // 更新所有模板卡片的页面标签
+            document.querySelectorAll('.template-pages').forEach(pagesDiv => {
+                pagesDiv.innerHTML = selectedPages.map(page => `<span class="page-tag">${page}</span>`).join('');
+            });
+        }
+
+
+        // 添加驱动
+        function addDriver() {
+            alert('打开驱动库选择驱动');
+        }
+
+        // 编辑设备
+        function editDevice(type, name) {
+            alert(`打开${name}设备详情页\n可以修改设备信息与驱动导入`);
+        }
+
+        // 添加策略
+        function addStrategy() {
+            alert('打开策略库选择策略');
+        }
+
+        // 编辑策略
+        function editStrategy(type) {
+            alert(`编辑${type}策略`);
+        }
+
+        // 修改阈值
+        function modifyThresholds() {
+            if (!selectedAlarmTemplate) {
+                alert('请先选择一个告警阈值模板');
+                return;
+            }
+            const modal = document.getElementById('thresholdModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeThresholdModal() {
+            const modal = document.getElementById('thresholdModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function saveThresholds() {
+            alert('告警阈值已保存');
+            closeThresholdModal();
+        }
+
+        // 完成配置
+        function completeConfiguration() {
+            const config = {
+                ...formData,
+                template: selectedTemplate
+            };
+            console.log('配置完成:', config);
+            alert('工程配置已完成！\n\n将进入调试自检环节...');
+            // 这里可以跳转到调试自检界面
+        }
+
+        const thresholdModalCloseBtn = document.getElementById('thresholdModalClose');
+        if (thresholdModalCloseBtn) {
+            thresholdModalCloseBtn.addEventListener('click', closeThresholdModal);
+        }
+
+        const thresholdModal = document.getElementById('thresholdModal');
+        if (thresholdModal) {
+            thresholdModal.addEventListener('click', function (event) {
+                if (event.target === thresholdModal) {
+                    closeThresholdModal();
+                }
+            });
+        }
+
+        // 页面加载时初始化
+        init();
+    </script>
+</body>
+</html>
