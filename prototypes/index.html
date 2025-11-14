@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云基动环监控系统 · 原型入口</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --dark: #1f2a44;
+            --text: #2c3e50;
+            --muted: #7f8c8d;
+            --bg: #f4f6fb;
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(120deg, #f5f7ff 0%, #e6ecff 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .hero {
+            width: 100%;
+            padding: 60px 20px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.16), rgba(118, 75, 162, 0.16));
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            font-size: 16px;
+            color: var(--muted);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px 60px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 25px 0 15px;
+            color: var(--dark);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(31, 42, 68, 0.08);
+            padding: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 45px rgba(31, 42, 68, 0.15);
+            border-color: rgba(102, 126, 234, 0.25);
+        }
+
+        .card .emoji {
+            font-size: 34px;
+        }
+
+        .card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .card p {
+            flex: 1;
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .card a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        .card a:hover {
+            transform: translateY(-1px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px 0 30px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <h1>云基动环监控系统 · 原型入口</h1>
+        <p>快速预览工程配置、调试自检、监控大屏等核心原型</p>
+    </header>
+
+    <main class="container">
+        <h2 class="section-title">核心流程原型</h2>
+        <div class="card-grid">
+            <div class="card">
+                <div class="emoji">🧩</div>
+                <h3>工程模板选择</h3>
+                <p>生产人员用于录入机柜、配电、空调等基础参数，并配置工程模板、策略、阈值等内容。</p>
+                <a href="01-工程模板选择界面.html" target="_blank">进入工程配置</a>
+            </div>
+
+            <div class="card">
+                <div class="emoji">🛠️</div>
+                <h3>调试自检</h3>
+                <p>安装人员进入现场部署后的调试自检平台，执行自动检测并生成验收报告。</p>
+                <a href="02-调试自检界面.html" target="_blank">进入调试平台</a>
+            </div>
+
+            <div class="card">
+                <div class="emoji">📊</div>
+                <h3>动环监控平台</h3>
+                <p>客户和运维人员的监控门户，查看实时运行状态、告警、报表和远程控制能力。</p>
+                <a href="03-动环监控软件界面.html" target="_blank">进入监控平台</a>
+            </div>
+        </div>
+
+        <h2 class="section-title">辅助说明与资料</h2>
+        <div class="card-grid">
+            <div class="card">
+                <div class="emoji">🔁</div>
+                <h3>业务流程图</h3>
+                <p>展示从生产、安装到运维的整体业务流程，便于统一沟通。包含截图式 Mermaid 绘图。</p>
+                <a href="业务流程图.html" target="_blank">查看业务流程</a>
+            </div>
+
+            <div class="card">
+                <div class="emoji">🏗️</div>
+                <h3>系统架构图</h3>
+                <p>包含上下文图、用例图、逻辑架构图，帮助理解云基系统的角色与模块划分。</p>
+                <a href="系统架构图.html" target="_blank">查看架构图</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        云基动环监控系统 · 原型库入口
+    </footer>
+</body>
+</html>
+
+
