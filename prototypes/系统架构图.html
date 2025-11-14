@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云基动环监控系统 - 架构图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        .diagram-section {
+            margin-bottom: 60px;
+        }
+
+        .diagram-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            min-height: 700px;
+        }
+
+        .diagram-description {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #52616b;
+            line-height: 1.8;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: #2c3e50;
+        }
+
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .diagram-content {
+            display: none;
+        }
+
+        .diagram-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>云基动环监控系统架构图</h1>
+        <p class="subtitle">系统上下文图、用例图、逻辑架构图</p>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showDiagram('context')">1. 上下文图</button>
+            <button class="nav-tab" onclick="showDiagram('usecase')">2. 用例图</button>
+            <button class="nav-tab" onclick="showDiagram('architecture')">3. 逻辑架构图</button>
+        </div>
+
+        <!-- 上下文图 -->
+        <div id="context" class="diagram-content active">
+            <div class="diagram-section">
+                <h2 class="diagram-title">📡 系统上下文图 (Context Diagram)</h2>
+                <div class="diagram-container">
+                    <div class="mermaid">
+graph TB
+    subgraph Top[" "]
+        direction LR
+        Production["生产人员<br/>Production Personnel"]
+        Installer["安装人员<br/>Installation Personnel"]
+        Customer["客户人员<br/>Customer Personnel"]
+        Engineer["售后工程师<br/>After-sales Engineer"]
+    end
+
+    subgraph Middle[" "]
+        System["云基动环监控系统<br/>Core System"]
+    end
+
+    subgraph Bottom[" "]
+        direction LR
+        Devices["监控设备<br/>Monitoring Devices<br/>(UPS/PDU/空调/电池等)"]
+        Database["数据库<br/>Database"]
+        FileSystem["文件系统<br/>File System"]
+        Network["网络系统<br/>Network System"]
+    end
+
+    Production -->|工程配置<br/>Engineering Config| System
+    Production -->|策略库管理<br/>Strategy Library| System
+    Production -->|模板管理<br/>Template Management| System
+
+    Installer -->|现场部署<br/>On-site Deployment| System
+    Installer -->|设备接入<br/>Device Access| System
+    Installer -->|验收检测<br/>Acceptance Test| System
+
+    Customer -->|运维巡检<br/>Operations Inspection| System
+    Customer -->|告警处理<br/>Alarm Handling| System
+    Customer -->|数据查询<br/>Data Query| System
+    Customer -->|报表查看<br/>Report Viewing| System
+
+    Engineer -->|系统维护<br/>System Maintenance| System
+    Engineer -->|升级更新<br/>Upgrade| System
+    Engineer -->|故障诊断<br/>Fault Diagnosis| System
+
+    System -->|数据采集<br/>Data Collection| Devices
+    System -->|设备控制<br/>Device Control| Devices
+    System -->|状态监控<br/>Status Monitoring| Devices
+
+    System -->|数据存储<br/>Data Storage| Database
+    System -->|配置存储<br/>Config Storage| Database
+    System -->|日志存储<br/>Log Storage| Database
+
+    System -->|文件读写<br/>File I/O| FileSystem
+    System -->|网络通信<br/>Network Communication| Network
+
+    style System fill:#667eea,stroke:#764ba2,stroke-width:4px,color:#fff
+    style Production fill:#ffc107,stroke:#ff9800,stroke-width:2px
+    style Installer fill:#4ecdc4,stroke:#44a08d,stroke-width:2px
+    style Customer fill:#52d291,stroke:#198754,stroke-width:2px
+    style Engineer fill:#ff6c6c,stroke:#dc3545,stroke-width:2px
+    style Devices fill:#95a5a6,stroke:#7f8c8d,stroke-width:2px
+    style Database fill:#9b59b6,stroke:#8e44ad,stroke-width:2px
+    style FileSystem fill:#3498db,stroke:#2980b9,stroke-width:2px
+    style Network fill:#e67e22,stroke:#d35400,stroke-width:2px
+    style Top fill:transparent,stroke:transparent
+    style Middle fill:transparent,stroke:transparent
+    style Bottom fill:transparent,stroke:transparent
+                    </div>
+                </div>
+                <div class="diagram-description">
+                    <strong>说明：</strong>系统上下文图展示了云基动环监控系统与外部实体之间的交互关系。
+                    系统核心与生产人员、安装人员、客户人员、售后工程师等用户角色交互，同时与监控设备、数据库、文件系统、网络系统等外部系统进行数据交换。
+                </div>
+            </div>
+        </div>
+
+        <!-- 用例图 -->
+        <div id="usecase" class="diagram-content">
+            <div class="diagram-section">
+                <h2 class="diagram-title">👥 用例图 (Use Case Diagram)</h2>
+                <div class="diagram-container">
+                    <div class="mermaid" id="usecaseDiagram">
+graph LR
+    subgraph P1["生产人员"]
+        direction TB
+        UC1[工程模板配置]
+        UC2[机柜信息录入]
+        UC3[设备配置管理]
+        UC4[联动策略配置]
+        UC5[告警规则配置]
+        UC6[组态模板选择]
+        UC1 --> UC2
+        UC1 --> UC3
+        UC1 --> UC4
+        UC1 --> UC5
+        UC1 --> UC6
+    end
+
+    subgraph P2["安装人员"]
+        direction TB
+        UC7[系统调试自检]
+        UC8[验收报告生成]
+        UC7 --> UC8
+    end
+
+    subgraph P3["客户人员"]
+        direction TB
+        UC9[实时监控]
+        UC10[告警管理]
+        UC11[数据查询]
+        UC12[报表分析]
+        UC13[运维巡检]
+    end
+
+    subgraph P4["售后工程师"]
+        direction TB
+        UC14[系统维护]
+        UC15[系统升级]
+        UC16[故障诊断]
+    end
+
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+
+    style P1 fill:#fff3cd,stroke:#ffc107,stroke-width:3px
+    style P2 fill:#d1ecf1,stroke:#4ecdc4,stroke-width:3px
+    style P3 fill:#d4edda,stroke:#52d291,stroke-width:3px
+    style P4 fill:#f8d7da,stroke:#ff6c6c,stroke-width:3px
+    style UC1 fill:#667eea,stroke:#764ba2,stroke-width:2px,color:#fff
+    style UC7 fill:#667eea,stroke:#764ba2,stroke-width:2px,color:#fff
+    style UC9 fill:#667eea,stroke:#764ba2,stroke-width:2px,color:#fff
+                    </div>
+                </div>
+                <div class="diagram-description">
+                    <strong>说明：</strong>用例图展示了不同用户角色与系统功能用例之间的关系。
+                    生产人员主要负责工程配置相关用例，安装人员负责调试自检和验收，客户人员使用监控和运维功能，售后工程师负责系统维护和故障处理。
+                </div>
+            </div>
+        </div>
+
+        <!-- 逻辑架构图 -->
+        <div id="architecture" class="diagram-content">
+            <div class="diagram-section">
+                <h2 class="diagram-title">🏗️ 逻辑架构图 (Logical Architecture Diagram)</h2>
+                <div class="diagram-container">
+                    <div class="mermaid" id="architectureDiagram">
+graph TB
+    subgraph Layer1["表示层 Presentation Layer"]
+        UI1[工程模板选择界面]
+        UI2[调试自检界面]
+        UI3[动环监控平台]
+        UI4[移动端APP]
+    end
+
+    subgraph Layer2["业务逻辑层 Business Logic Layer"]
+        BL1[工程配置服务]
+        BL2[设备管理服务]
+        BL3[策略管理服务]
+        BL4[告警管理服务]
+        BL5[数据采集服务]
+        BL6[联动控制服务]
+        BL7[调试自检服务]
+        BL8[监控展示服务]
+        BL9[报表分析服务]
+        BL10[用户权限服务]
+    end
+
+    subgraph Layer3["数据访问层 Data Access Layer"]
+        DAL1[设备数据访问]
+        DAL2[配置数据访问]
+        DAL3[历史数据访问]
+        DAL4[日志数据访问]
+    end
+
+    subgraph Layer4["数据层 Data Layer"]
+        DB1[实时数据库]
+        DB2[历史数据库]
+        DB3[配置数据库]
+        DB4[日志数据库]
+    end
+
+    subgraph Layer5["设备接口层 Device Interface Layer"]
+        DI1[设备驱动管理]
+        DI2[通信协议适配]
+        DI3[设备连接管理]
+    end
+
+    subgraph Layer6["外部系统 External Systems"]
+        EXT1[监控设备]
+        EXT2[第三方系统]
+    end
+
+    UI1 --> BL1
+    UI1 --> BL2
+    UI1 --> BL3
+    UI2 --> BL7
+    UI3 --> BL4
+    UI3 --> BL5
+    UI3 --> BL8
+    UI3 --> BL9
+    UI4 --> BL8
+    UI4 --> BL4
+
+    BL1 --> DAL2
+    BL2 --> DAL1
+    BL3 --> DAL2
+    BL4 --> DAL1
+    BL4 --> DAL4
+    BL5 --> DAL1
+    BL6 --> DAL1
+    BL7 --> DAL1
+    BL7 --> DAL4
+    BL8 --> DAL1
+    BL8 --> DAL3
+    BL9 --> DAL3
+    BL10 --> DAL2
+
+    DAL1 --> DB1
+    DAL2 --> DB3
+    DAL3 --> DB2
+    DAL4 --> DB4
+
+    BL5 --> DI1
+    BL6 --> DI1
+    BL2 --> DI1
+
+    DI1 --> DI2
+    DI1 --> DI3
+    DI2 --> EXT1
+    DI3 --> EXT1
+
+    BL4 -.-> EXT2
+    BL9 -.-> EXT2
+
+    style Layer1 fill:#e7f1ff,stroke:#667eea,stroke-width:3px
+    style Layer2 fill:#d4edda,stroke:#52d291,stroke-width:3px
+    style Layer3 fill:#fff3cd,stroke:#ffc107,stroke-width:3px
+    style Layer4 fill:#e2d9f3,stroke:#9b59b6,stroke-width:3px
+    style Layer5 fill:#d1ecf1,stroke:#4ecdc4,stroke-width:3px
+    style Layer6 fill:#f8d7da,stroke:#ff6c6c,stroke-width:3px
+    style UI1 fill:#667eea,stroke:#764ba2,stroke-width:2px,color:#fff
+    style UI2 fill:#667eea,stroke:#764ba2,stroke-width:2px,color:#fff
+    style UI3 fill:#667eea,stroke:#764ba2,stroke-width:2px,color:#fff
+                    </div>
+                </div>
+                <div class="diagram-description">
+                    <strong>说明：</strong>逻辑架构图展示了系统的分层架构设计。
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li><strong>表示层：</strong>包含工程模板选择界面、调试自检界面、动环监控平台和移动端APP</li>
+                        <li><strong>业务逻辑层：</strong>包含各种业务服务，如工程配置、设备管理、策略管理、告警管理等</li>
+                        <li><strong>数据访问层：</strong>提供统一的数据访问接口，隔离业务逻辑与数据存储</li>
+                        <li><strong>数据层：</strong>包含实时数据库、历史数据库、配置数据库和日志数据库</li>
+                        <li><strong>设备接口层：</strong>负责设备驱动管理、通信协议适配和设备连接管理</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#667eea',
+                secondaryColor: '#f0f4ff',
+                tertiaryColor: '#f8f9fa',
+                noteBkgColor: '#fff3cd',
+                noteTextColor: '#856404',
+                noteBorderColor: '#ffc107',
+                actorBorder: '#667eea',
+                actorBkg: '#f0f4ff',
+                actorTextColor: '#2c3e50',
+                actorLineColor: '#667eea',
+                signalColor: '#667eea',
+                signalTextColor: '#2c3e50',
+                labelBoxBkgColor: '#f0f4ff',
+                labelBoxBorderColor: '#667eea',
+                labelTextColor: '#2c3e50',
+                loopTextColor: '#2c3e50',
+                activationBorderColor: '#667eea',
+                activationBkgColor: '#e7f1ff',
+                sequenceNumberColor: '#fff',
+                sectionBkgColor: '#f8f9fa',
+                altBkgColor: '#f0f4ff',
+                critBkgColor: '#fff5f5',
+                doneBkgColor: '#d1e7dd',
+                doneBorderColor: '#198754'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 50,
+                nodeSpacing: 80,
+                rankSpacing: 120
+            }
+        });
+
+        function showDiagram(diagramId) {
+            // 隐藏所有图表
+            document.querySelectorAll('.diagram-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // 移除所有标签的active状态
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 显示选中的图表
+            const targetContent = document.getElementById(diagramId);
+            targetContent.classList.add('active');
+            
+            // 激活对应的标签
+            event.target.classList.add('active');
+
+            // 重新渲染Mermaid图表（如果需要）
+            setTimeout(() => {
+                const mermaidElements = targetContent.querySelectorAll('.mermaid');
+                mermaidElements.forEach(element => {
+                    // 如果图表还没有渲染，强制重新初始化
+                    if (!element.querySelector('svg')) {
+                        const graphDefinition = element.textContent.trim();
+                        element.innerHTML = '';
+                        element.textContent = graphDefinition;
+                        mermaid.init(undefined, [element]);
+                    }
+                });
+            }, 100);
+        }
+    </script>
+</body>
+</html>
+

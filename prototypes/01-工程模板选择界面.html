@@ -792,6 +792,253 @@
             gap: 10px;
         }
 
+        /* 策略库弹窗样式 */
+        .strategy-library-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 18px;
+        }
+
+        .strategy-library-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+            flex-shrink: 0;
+        }
+
+        .strategy-search {
+            flex: 1;
+        }
+
+        .strategy-category-filter {
+            display: flex;
+            gap: 10px;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            background: white;
+            color: #7f8c8d;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .strategy-list-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .strategy-library-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .strategy-library-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .strategy-library-item.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .strategy-library-item.selected::before {
+            content: "✓";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 24px;
+            height: 24px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .strategy-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .strategy-item-info {
+            flex: 1;
+        }
+
+        .strategy-item-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .strategy-item-icon {
+            font-size: 24px;
+        }
+
+        .strategy-item-desc {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .strategy-item-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .strategy-item-category {
+            padding: 4px 10px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        /* 横向树形逻辑图样式 */
+        .strategy-logic-diagram {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .logic-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 100%;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .logic-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex-shrink: 0;
+            min-width: 120px;
+        }
+
+        .logic-node-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 2;
+            min-width: 100px;
+        }
+
+        .logic-node-box.condition {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .logic-node-box.action {
+            background: #198754;
+            color: white;
+            border-color: #198754;
+        }
+
+        .logic-node-box.trigger {
+            background: #ffc107;
+            color: #2c3e50;
+            border-color: #ffc107;
+        }
+
+        .logic-node-label {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+
+        .logic-arrow {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+
+        .logic-arrow::after {
+            content: "";
+            position: absolute;
+            right: -8px;
+            top: -5px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #667eea;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+        }
+
+        .logic-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logic-branch-label {
+            font-size: 11px;
+            color: #667eea;
+            font-weight: 600;
+            padding: 2px 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+        }
+
         /* 底部操作栏 */
         .action-bar {
             position: fixed;
@@ -816,6 +1063,122 @@
         .btn-large {
             padding: 12px 30px;
             font-size: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 长按倒计时描边动画 */
+        .btn-long-press {
+            position: relative;
+        }
+
+        .btn-long-press::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 3px solid transparent;
+            border-radius: 6px;
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+
+        .btn-long-press.counting::before {
+            border-color: #ffc107;
+            border-image: linear-gradient(90deg, #ffc107 0%, #ffc107 0%, transparent 0%, transparent 100%) 1;
+            animation: borderProgress 3s linear forwards;
+        }
+
+        @keyframes borderProgress {
+            0% {
+                border-image-source: linear-gradient(90deg, #ffc107 0%, #ffc107 0%, transparent 0%, transparent 100%);
+            }
+            25% {
+                border-image-source: linear-gradient(90deg, #ffc107 0%, #ffc107 25%, transparent 25%, transparent 100%);
+            }
+            50% {
+                border-image-source: linear-gradient(90deg, #ffc107 0%, #ffc107 50%, transparent 50%, transparent 100%);
+            }
+            75% {
+                border-image-source: linear-gradient(90deg, #ffc107 0%, #ffc107 75%, transparent 75%, transparent 100%);
+            }
+            100% {
+                border-image-source: linear-gradient(90deg, #ffc107 0%, #ffc107 100%, transparent 100%, transparent 100%);
+            }
+        }
+
+        /* 使用SVG描边动画（更精确） */
+        .btn-long-press .border-progress {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            width: calc(100% + 6px);
+            height: calc(100% + 6px);
+            border-radius: 9px;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .btn-long-press.counting .border-progress {
+            opacity: 1;
+        }
+
+        .btn-long-press .border-progress svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .btn-long-press .border-progress rect {
+            fill: none;
+            stroke: #ffc107;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-long-press.counting .border-progress rect {
+            animation: strokeProgress 3s linear forwards;
+        }
+
+        @keyframes strokeProgress {
+            to {
+                stroke-dashoffset: 0 !important;
+            }
+        }
+
+        /* 完成提示动画 */
+        .btn-long-press.completed {
+            animation: pulseComplete 0.6s ease-in-out 3;
+        }
+
+        @keyframes pulseComplete {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 8px 24px rgba(220, 53, 69, 0.6);
+            }
+        }
+
+        /* 闪烁提示动画 - 告诉用户可以松手 */
+        .btn-long-press.ready {
+            animation: blinkReady 0.4s ease-in-out infinite;
+        }
+
+        @keyframes blinkReady {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 10px 30px rgba(220, 53, 69, 0.8);
+            }
         }
 
         /* 滚动条样式 */
@@ -851,6 +1214,39 @@
             <div class="user-info">
                 <span>👤</span>
                 <span>管理员</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 策略库弹窗 -->
+    <div class="modal-overlay" id="strategyModal">
+        <div class="modal" style="width: 1400px; height: 800px;">
+            <div class="modal-header">
+                <div class="modal-title">策略库 - 选择策略</div>
+                <button class="modal-close" id="strategyModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="strategy-library-panel">
+                    <div class="strategy-library-header">
+                        <div class="strategy-search">
+                            <input type="text" id="strategySearch" class="form-input" placeholder="搜索策略名称或描述..." style="max-width: 400px;">
+                        </div>
+                        <div class="strategy-category-filter">
+                            <button class="category-btn active" data-category="all">全部</button>
+                            <button class="category-btn" data-category="pue">PUE管理</button>
+                            <button class="category-btn" data-category="alarm">告警控制</button>
+                            <button class="category-btn" data-category="lighting">照明控制</button>
+                            <button class="category-btn" data-category="power">电源管理</button>
+                        </div>
+                    </div>
+                    <div class="strategy-list-container" id="strategyLibraryList">
+                        <!-- 策略列表将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 15px 24px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-secondary" onclick="closeStrategyModal()">取消</button>
+                <button class="btn btn-primary" onclick="confirmAddStrategy()">确认添加</button>
             </div>
         </div>
     </div>
@@ -1334,7 +1730,14 @@
         </div>
         <div class="action-buttons">
             <button class="btn btn-secondary btn-large" id="prevBtn" onclick="prevStep()" style="display: none;">上一步</button>
-            <button class="btn btn-primary btn-large" id="nextBtn" onclick="nextStep()">下一步</button>
+            <button class="btn btn-primary btn-large btn-long-press" id="nextBtn" onclick="nextStep()">
+                下一步
+                <div class="border-progress">
+                    <svg viewBox="0 0 200 50" preserveAspectRatio="none">
+                        <rect x="1.5" y="1.5" width="197" height="47" rx="6" ry="6"/>
+                    </svg>
+                </div>
+            </button>
         </div>
     </div>
 
@@ -1383,6 +1786,11 @@
 
         // 下一步
         function nextStep() {
+            // 如果正在长按，不执行正常点击
+            if (isLongPressing) {
+                return;
+            }
+            
             if (currentStep === 1) {
                 // 验证第一步表单
                 const form = document.getElementById('cabinetInfoForm');
@@ -1452,7 +1860,13 @@
 
             // 更新按钮
             document.getElementById('prevBtn').style.display = currentStep > 1 ? 'block' : 'none';
-            document.getElementById('nextBtn').textContent = currentStep === totalSteps ? '完成配置' : '下一步';
+            const nextBtn = document.getElementById('nextBtn');
+            // 如果正在长按，不更新按钮文字
+            if (!isLongPressing) {
+                nextBtn.textContent = currentStep === totalSteps ? '完成配置' : '下一步';
+                // 恢复按钮样式
+                nextBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }
 
             updateStepsLine();
             updateActionInfo();
@@ -1682,9 +2096,277 @@
             alert(`打开${name}设备详情页\n可以修改设备信息与驱动导入`);
         }
 
+        // 策略库数据
+        const strategyLibrary = [
+            {
+                id: 'pue-001',
+                name: '机柜整体PUE计算',
+                desc: '实时计算和监控机柜整体PUE值，通过采集IT设备功率和总功率，自动计算PUE指标，优化能耗管理',
+                icon: '📊',
+                category: 'pue',
+                logic: [
+                    { type: 'trigger', label: '触发', text: '定时采集' },
+                    { type: 'condition', label: '条件', text: '获取IT功率' },
+                    { type: 'condition', label: '条件', text: '获取总功率' },
+                    { type: 'action', label: '动作', text: '计算PUE' },
+                    { type: 'action', label: '动作', text: '更新显示' }
+                ]
+            },
+            {
+                id: 'alarm-001',
+                name: '声光报警控制',
+                desc: '当检测到告警事件时，自动触发声光报警器，提供多级报警响应机制，支持告警级别配置',
+                icon: '🚨',
+                category: 'alarm',
+                logic: [
+                    { type: 'trigger', label: '触发', text: '告警事件' },
+                    { type: 'condition', label: '条件', text: '判断告警级别' },
+                    { type: 'action', label: '动作', text: '启动声光报警' },
+                    { type: 'action', label: '动作', text: '发送通知' }
+                ]
+            },
+            {
+                id: 'lighting-001',
+                name: '智能照明控制',
+                desc: '根据环境光线自动调节照明亮度，支持定时开关和手动控制，实现节能和智能化管理',
+                icon: '💡',
+                category: 'lighting',
+                logic: [
+                    { type: 'trigger', label: '触发', text: '光线检测' },
+                    { type: 'condition', label: '条件', text: '光线<阈值' },
+                    { type: 'action', label: '动作', text: '开启照明' },
+                    { type: 'action', label: '动作', text: '调节亮度' }
+                ]
+            },
+            {
+                id: 'door-001',
+                name: '前后门告警联动',
+                desc: '监控前后门状态，异常开启时触发告警，支持门禁联动和记录查询功能',
+                icon: '🚪',
+                category: 'alarm',
+                logic: [
+                    { type: 'trigger', label: '触发', text: '门状态变化' },
+                    { type: 'condition', label: '条件', text: '门异常开启' },
+                    { type: 'action', label: '动作', text: '触发告警' },
+                    { type: 'action', label: '动作', text: '记录日志' }
+                ]
+            },
+            {
+                id: 'rgb-001',
+                name: 'RGB灯带控制',
+                desc: 'RGB灯带颜色变化和闪烁控制策略，支持多种颜色模式和闪烁频率配置',
+                icon: '🎨',
+                category: 'lighting',
+                logic: [
+                    { type: 'trigger', label: '触发', text: '状态变化' },
+                    { type: 'condition', label: '条件', text: '判断状态类型' },
+                    { type: 'action', label: '动作', text: '设置颜色' },
+                    { type: 'action', label: '动作', text: '控制闪烁' }
+                ]
+            },
+            {
+                id: 'ups-001',
+                name: 'UPS异常告警',
+                desc: 'UPS异常自动告警和切换电源策略，监控UPS状态，异常时自动切换备用电源',
+                icon: '⚡',
+                category: 'power',
+                logic: [
+                    { type: 'trigger', label: '触发', text: 'UPS状态检测' },
+                    { type: 'condition', label: '条件', text: 'UPS异常' },
+                    { type: 'action', label: '动作', text: '触发告警' },
+                    { type: 'action', label: '动作', text: '切换备用电源' }
+                ]
+            },
+            {
+                id: 'it-power-001',
+                name: 'IT设备功率监控',
+                desc: '监控IT设备实时功率，进行功率分析和优化，支持功率上限告警和负载均衡',
+                icon: '💻',
+                category: 'power',
+                logic: [
+                    { type: 'trigger', label: '触发', text: '功率采集' },
+                    { type: 'condition', label: '条件', text: '功率>阈值' },
+                    { type: 'action', label: '动作', text: '发送告警' },
+                    { type: 'action', label: '动作', text: '记录数据' }
+                ]
+            },
+            {
+                id: 'temp-001',
+                name: '温度联动控制',
+                desc: '根据机柜温度自动调节空调运行状态，实现温度自动控制和节能优化',
+                icon: '❄️',
+                category: 'power',
+                logic: [
+                    { type: 'trigger', label: '触发', text: '温度检测' },
+                    { type: 'condition', label: '条件', text: '温度>设定值' },
+                    { type: 'action', label: '动作', text: '启动空调' },
+                    { type: 'action', label: '动作', text: '调节温度' }
+                ]
+            }
+        ];
+
+        let selectedStrategyId = null;
+        let currentCategory = 'all';
+        let searchKeyword = '';
+
         // 添加策略
         function addStrategy() {
-            alert('打开策略库选择策略');
+            selectedStrategyId = null;
+            currentCategory = 'all';
+            searchKeyword = '';
+            
+            // 重置搜索框
+            const searchInput = document.getElementById('strategySearch');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            
+            // 重置分类按钮
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-category') === 'all') {
+                    btn.classList.add('active');
+                }
+            });
+            
+            renderStrategyLibrary();
+            const modal = document.getElementById('strategyModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        // 关闭策略库弹窗
+        function closeStrategyModal() {
+            const modal = document.getElementById('strategyModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // 确认添加策略
+        function confirmAddStrategy() {
+            if (!selectedStrategyId) {
+                alert('请选择一个策略');
+                return;
+            }
+            const strategy = strategyLibrary.find(s => s.id === selectedStrategyId);
+            if (strategy) {
+                // 获取现有策略列表
+                const list = document.getElementById('strategyList');
+                const existingStrategies = [];
+                
+                // 从DOM中提取现有策略
+                list.querySelectorAll('.match-item').forEach(item => {
+                    const name = item.querySelector('.match-item-name')?.textContent || '';
+                    const desc = item.querySelector('.match-item-desc')?.textContent || '';
+                    const icon = item.querySelector('.match-item-icon')?.textContent || '';
+                    const type = item.querySelector('button')?.getAttribute('onclick')?.match(/'([^']+)'/)?.[1] || '';
+                    if (name) {
+                        existingStrategies.push({ name, desc, icon, type });
+                    }
+                });
+
+                // 检查是否已存在
+                if (existingStrategies.some(s => s.type === strategy.id)) {
+                    alert('该策略已添加，请勿重复添加');
+                    return;
+                }
+
+                // 添加新策略
+                existingStrategies.push({
+                    name: strategy.name,
+                    desc: strategy.desc,
+                    icon: strategy.icon,
+                    type: strategy.id
+                });
+                
+                renderStrategies(existingStrategies);
+                closeStrategyModal();
+            }
+        }
+
+        // 渲染策略库
+        function renderStrategyLibrary() {
+            const container = document.getElementById('strategyLibraryList');
+            let filteredStrategies = strategyLibrary;
+
+            // 按分类过滤
+            if (currentCategory !== 'all') {
+                filteredStrategies = filteredStrategies.filter(s => s.category === currentCategory);
+            }
+
+            // 按关键词搜索
+            if (searchKeyword) {
+                const keyword = searchKeyword.toLowerCase();
+                filteredStrategies = filteredStrategies.filter(s => 
+                    s.name.toLowerCase().includes(keyword) || 
+                    s.desc.toLowerCase().includes(keyword)
+                );
+            }
+
+            if (filteredStrategies.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #7f8c8d;">未找到匹配的策略</div>';
+                return;
+            }
+
+            container.innerHTML = filteredStrategies.map(strategy => `
+                <div class="strategy-library-item ${selectedStrategyId === strategy.id ? 'selected' : ''}" 
+                     onclick="selectStrategy('${strategy.id}')">
+                    <div class="strategy-item-header">
+                        <div class="strategy-item-info">
+                            <div class="strategy-item-name">
+                                <span class="strategy-item-icon">${strategy.icon}</span>
+                                <span>${strategy.name}</span>
+                            </div>
+                            <div class="strategy-item-desc">${strategy.desc}</div>
+                            <div class="strategy-item-meta">
+                                <span class="strategy-item-category">${getCategoryName(strategy.category)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="strategy-logic-diagram">
+                        ${renderLogicDiagram(strategy.logic)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染横向树形逻辑图
+        function renderLogicDiagram(logic) {
+            if (!logic || logic.length === 0) return '';
+            
+            let html = '<div class="logic-flow">';
+            logic.forEach((node, index) => {
+                if (index > 0) {
+                    html += '<div class="logic-arrow"></div>';
+                }
+                html += `
+                    <div class="logic-node">
+                        <div class="logic-node-box ${node.type}">${node.text}</div>
+                        <div class="logic-node-label">${node.label}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        // 选择策略
+        function selectStrategy(id) {
+            selectedStrategyId = id;
+            renderStrategyLibrary();
+        }
+
+        // 获取分类名称
+        function getCategoryName(category) {
+            const names = {
+                'pue': 'PUE管理',
+                'alarm': '告警控制',
+                'lighting': '照明控制',
+                'power': '电源管理'
+            };
+            return names[category] || '其他';
         }
 
         // 编辑策略
@@ -1716,6 +2398,12 @@
             closeThresholdModal();
         }
 
+        // 长按相关变量
+        let longPressTimer = null;
+        let isLongPressing = false;
+        let hasDelivered = false;
+        const LONG_PRESS_DURATION = 3000; // 3秒
+
         // 完成配置
         function completeConfiguration() {
             const config = {
@@ -1724,7 +2412,229 @@
             };
             console.log('配置完成:', config);
             alert('工程配置已完成！\n\n将进入调试自检环节...');
-            // 这里可以跳转到调试自检界面
+            // 跳转到调试自检界面
+            window.location.href = '02-调试自检界面.html';
+        }
+
+        // 项目交付
+        function deliverProject() {
+            if (confirm('确认交付项目？\n\n交付后生产平台将关闭。')) {
+                // 隐藏生产平台（可以关闭窗口或隐藏页面）
+                document.body.style.display = 'none';
+                // 或者使用 window.close() 如果是在新窗口中打开
+                // window.close();
+                alert('项目已交付，生产平台已关闭。');
+            }
+        }
+
+        // 初始化长按功能
+        function initLongPress() {
+            const nextBtn = document.getElementById('nextBtn');
+            if (!nextBtn) return;
+
+            let pressStartTime = 0;
+            
+            // 计算SVG路径长度并设置stroke-dasharray
+            const updateBorderPath = () => {
+                const borderRect = nextBtn.querySelector('.border-progress rect');
+                if (borderRect) {
+                    const rect = nextBtn.getBoundingClientRect();
+                    const perimeter = (rect.width + rect.height) * 2;
+                    borderRect.setAttribute('stroke-dasharray', perimeter);
+                    borderRect.style.strokeDashoffset = perimeter;
+                }
+            };
+            
+            // 初始化路径长度
+            setTimeout(updateBorderPath, 100);
+            
+            // 窗口大小改变时更新
+            window.addEventListener('resize', updateBorderPath);
+
+            // 鼠标按下事件
+            nextBtn.addEventListener('mousedown', function(e) {
+                // 只在"完成配置"按钮时启用长按功能
+                if (this.textContent === '完成配置') {
+                    isLongPressing = true;
+                    hasDelivered = false;
+                    pressStartTime = Date.now();
+                    const originalText = this.textContent;
+                    
+                    // 立即改变按钮文字
+                    this.textContent = '项目交付';
+                    this.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                    
+                    // 更新路径长度并添加倒计时动画类
+                    updateBorderPath();
+                    this.classList.add('counting');
+                    
+                    // 重置动画
+                    const borderRect = this.querySelector('.border-progress rect');
+                    if (borderRect) {
+                        const rect = this.getBoundingClientRect();
+                        const perimeter = (rect.width + rect.height) * 2;
+                        borderRect.style.strokeDashoffset = perimeter;
+                    }
+                    
+                    // 开始计时
+                    longPressTimer = setTimeout(() => {
+                        if (isLongPressing) {
+                            hasDelivered = true;
+                            // 移除倒计时动画，添加完成提示动画
+                            this.classList.remove('counting');
+                            this.classList.add('ready');
+                            
+                            // 改变按钮文字提示用户可以松手
+                            const currentText = this.textContent;
+                            this.textContent = '可以松手了';
+                            
+                            // 延迟执行交付，让用户看到提示动画
+                            setTimeout(() => {
+                                deliverProject();
+                                // 重置按钮状态
+                                resetButtonState(this, originalText);
+                            }, 800);
+                        }
+                    }, LONG_PRESS_DURATION);
+                }
+            });
+
+            // 鼠标释放事件
+            nextBtn.addEventListener('mouseup', function(e) {
+                if (isLongPressing && (this.textContent === '项目交付' || this.textContent === '可以松手了')) {
+                    const pressDuration = Date.now() - pressStartTime;
+                    clearTimeout(longPressTimer);
+                    
+                    // 如果已经交付，阻止正常点击
+                    if (hasDelivered) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    } else if (pressDuration < LONG_PRESS_DURATION) {
+                        // 如果长按时间不足3秒，阻止正常点击，恢复按钮状态
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // 移除倒计时动画
+                        this.classList.remove('counting');
+                        const originalText = '完成配置';
+                        resetButtonState(this, originalText);
+                    }
+                }
+            });
+
+            // 阻止点击事件在长按状态下触发
+            nextBtn.addEventListener('click', function(e) {
+                if (isLongPressing && (this.textContent === '项目交付' || this.textContent === '可以松手了' || hasDelivered)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+
+            // 鼠标离开事件
+            nextBtn.addEventListener('mouseleave', function() {
+                if (isLongPressing && (this.textContent === '项目交付' || this.textContent === '可以松手了') && !hasDelivered) {
+                    clearTimeout(longPressTimer);
+                    // 移除倒计时动画
+                    this.classList.remove('counting');
+                    const originalText = '完成配置';
+                    resetButtonState(this, originalText);
+                }
+            });
+
+            // 触摸事件支持（移动端）
+            nextBtn.addEventListener('touchstart', function(e) {
+                if (this.textContent === '完成配置') {
+                    e.preventDefault();
+                    isLongPressing = true;
+                    hasDelivered = false;
+                    pressStartTime = Date.now();
+                    const originalText = this.textContent;
+                    
+                    this.textContent = '项目交付';
+                    this.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                    
+                    // 更新路径长度并添加倒计时动画类
+                    updateBorderPath();
+                    this.classList.add('counting');
+                    
+                    // 重置动画
+                    const borderRect = this.querySelector('.border-progress rect');
+                    if (borderRect) {
+                        const rect = this.getBoundingClientRect();
+                        const perimeter = (rect.width + rect.height) * 2;
+                        borderRect.style.strokeDashoffset = perimeter;
+                    }
+                    
+                    longPressTimer = setTimeout(() => {
+                        if (isLongPressing) {
+                            hasDelivered = true;
+                            // 移除倒计时动画，添加完成提示动画
+                            this.classList.remove('counting');
+                            this.classList.add('ready');
+                            
+                            // 改变按钮文字提示用户可以松手
+                            this.textContent = '可以松手了';
+                            
+                            // 延迟执行交付，让用户看到提示动画
+                            setTimeout(() => {
+                                deliverProject();
+                                resetButtonState(this, originalText);
+                            }, 800);
+                        }
+                    }, LONG_PRESS_DURATION);
+                }
+            });
+
+            nextBtn.addEventListener('touchend', function(e) {
+                if (isLongPressing && (this.textContent === '项目交付' || this.textContent === '可以松手了')) {
+                    e.preventDefault();
+                    const pressDuration = Date.now() - pressStartTime;
+                    clearTimeout(longPressTimer);
+                    
+                    if (hasDelivered) {
+                        e.stopPropagation();
+                    } else if (pressDuration < LONG_PRESS_DURATION) {
+                        e.stopPropagation();
+                        // 移除倒计时动画
+                        this.classList.remove('counting');
+                        const originalText = '完成配置';
+                        resetButtonState(this, originalText);
+                    }
+                }
+            });
+
+            nextBtn.addEventListener('touchcancel', function() {
+                if (isLongPressing && (this.textContent === '项目交付' || this.textContent === '可以松手了') && !hasDelivered) {
+                    clearTimeout(longPressTimer);
+                    // 移除倒计时动画
+                    this.classList.remove('counting');
+                    const originalText = '完成配置';
+                    resetButtonState(this, originalText);
+                }
+            });
+        }
+
+        // 重置按钮状态
+        function resetButtonState(button, originalText) {
+            isLongPressing = false;
+            hasDelivered = false;
+            button.textContent = originalText;
+            button.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            // 移除所有动画类
+            button.classList.remove('counting', 'ready', 'completed');
+            // 重置SVG动画
+            const borderPath = button.querySelector('.border-progress rect');
+            if (borderPath) {
+                // 停止动画
+                borderPath.style.animation = 'none';
+                // 触发重排以重置动画
+                borderPath.offsetHeight;
+                // 重置stroke-dashoffset到初始值
+                const rect = button.getBoundingClientRect();
+                const perimeter = (rect.width + rect.height) * 2;
+                borderPath.style.strokeDashoffset = perimeter;
+                // 恢复动画属性（但不启动）
+                borderPath.style.animation = null;
+            }
         }
 
         const thresholdModalCloseBtn = document.getElementById('thresholdModalClose');
@@ -1741,8 +2651,49 @@
             });
         }
 
+        // 策略库弹窗关闭按钮
+        const strategyModalCloseBtn = document.getElementById('strategyModalClose');
+        if (strategyModalCloseBtn) {
+            strategyModalCloseBtn.addEventListener('click', closeStrategyModal);
+        }
+
+        // 策略库弹窗点击外部关闭
+        const strategyModal = document.getElementById('strategyModal');
+        if (strategyModal) {
+            strategyModal.addEventListener('click', function (event) {
+                if (event.target === strategyModal) {
+                    closeStrategyModal();
+                }
+            });
+        }
+
+        // 策略库搜索功能
+        const strategySearchInput = document.getElementById('strategySearch');
+        if (strategySearchInput) {
+            strategySearchInput.addEventListener('input', function(e) {
+                searchKeyword = e.target.value;
+                renderStrategyLibrary();
+            });
+        }
+
+        // 策略库分类过滤（使用事件委托，在弹窗打开时绑定）
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-btn')) {
+                e.preventDefault();
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentCategory = e.target.getAttribute('data-category');
+                renderStrategyLibrary();
+            }
+        });
+
         // 页面加载时初始化
         init();
+        
+        // 初始化长按功能
+        setTimeout(() => {
+            initLongPress();
+        }, 100);
     </script>
 </body>
 </html>

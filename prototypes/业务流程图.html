@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云基动环监控系统 - 业务流程图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .page-info {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .page-info h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .page-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .page-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-item h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-item ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .page-item li {
+            color: #52616b;
+            font-size: 14px;
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .page-item li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>云基动环监控系统业务流程</h1>
+        <p class="subtitle">从工程配置到系统上线的完整流程</p>
+
+        <div class="diagram-container">
+            <div class="mermaid">
+sequenceDiagram
+    participant 生产人员 as 生产人员<br/>Production
+    participant 工程模板选择 as 工程模板选择界面<br/>Engineering Template
+    participant 调试自检 as 调试自检界面<br/>Debug & Self-Check
+    participant 监控平台 as 动环监控平台<br/>Monitoring Platform
+    participant 客户人员 as 客户人员<br/>Customer
+
+    Note over 生产人员: 生产阶段 Production Phase
+    
+    生产人员->>工程模板选择: 1. 进入工程配置
+    Note right of 工程模板选择: 步骤1: 机柜信息录入<br/>• 项目类型（微模块/一体柜）<br/>• 空调配置<br/>• 电池配置<br/>• 电源配置<br/>• 配件选择<br/>• 单模块选择
+    
+    工程模板选择->>工程模板选择: 2. 工程文件确认
+    Note right of 工程模板选择: 步骤2: 工程文件确认<br/>• 设备配置<br/>• 联动策略（策略库选择）<br/>• 告警规则<br/>• 组态模板选择
+    
+    工程模板选择->>调试自检: 3. 完成配置 → 进入调试自检
+    
+    Note over 调试自检: 调试自检阶段 Debug Phase
+    
+    调试自检->>调试自检: 4. 开始检测（重置所有状态）
+    Note right of 调试自检: 系统调试自检<br/>• 系统初始化检测<br/>• 网络连接检测<br/>• 数据库连接检测<br/>• 设备通信检测<br/>• 数据采集检测<br/>• 告警服务检测<br/>• 联动控制检测<br/>• 用户权限检测<br/>• 存储空间检测<br/>• 性能指标检测
+    
+    调试自检->>调试自检: 5. 自动检测（生成验收报告）
+    
+    调试自检->>监控平台: 6. 进入监控 → 系统上线
+    
+    Note over 监控平台: 运行监控阶段 Monitoring Phase
+    
+    监控平台->>客户人员: 7. 系统交付使用
+    
+    客户人员->>监控平台: 8. 运维巡检
+    Note right of 监控平台: 监控功能<br/>• 实时监控<br/>• 告警管理<br/>• 数据查询<br/>• 报表生成
+    
+    客户人员->>监控平台: 9. 告警处理
+    
+    Note over 生产人员,客户人员: 完整业务流程 Complete Workflow
+            </div>
+        </div>
+
+        <div class="page-info">
+            <h2>📋 页面功能说明</h2>
+            <div class="page-list">
+                <div class="page-item">
+                    <h3>🔧 01-工程模板选择界面</h3>
+                    <ul>
+                        <li>机柜信息录入（项目类型、设备配置）</li>
+                        <li>工程文件确认（设备配置、联动策略、告警规则、组态模板）</li>
+                        <li>策略库选择（横向树形逻辑图展示）</li>
+                        <li>告警阈值配置</li>
+                        <li>组态模板选择（简约型/标准型/专业型）</li>
+                    </ul>
+                </div>
+                <div class="page-item">
+                    <h3>🔍 02-调试自检界面</h3>
+                    <ul>
+                        <li>检测进度可视化（进度点、进度线）</li>
+                        <li>10大检测项（系统、网络、数据库等）</li>
+                        <li>子检测项详细检测</li>
+                        <li>检测日志实时显示</li>
+                        <li>验收报告生成</li>
+                        <li>一键重置检测状态</li>
+                    </ul>
+                </div>
+                <div class="page-item">
+                    <h3>📊 03-动环监控平台</h3>
+                    <ul>
+                        <li>实时监控大屏</li>
+                        <li>多维度数据展示</li>
+                        <li>告警管理</li>
+                        <li>历史数据查询</li>
+                        <li>报表分析</li>
+                        <li>系统配置管理</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#667eea',
+                secondaryColor: '#f0f4ff',
+                tertiaryColor: '#f8f9fa',
+                noteBkgColor: '#fff3cd',
+                noteTextColor: '#856404',
+                noteBorderColor: '#ffc107',
+                actorBorder: '#667eea',
+                actorBkg: '#f0f4ff',
+                actorTextColor: '#2c3e50',
+                actorLineColor: '#667eea',
+                signalColor: '#667eea',
+                signalTextColor: '#2c3e50',
+                labelBoxBkgColor: '#f0f4ff',
+                labelBoxBorderColor: '#667eea',
+                labelTextColor: '#2c3e50',
+                loopTextColor: '#2c3e50',
+                activationBorderColor: '#667eea',
+                activationBkgColor: '#e7f1ff',
+                sequenceNumberColor: '#fff',
+                sectionBkgColor: '#f8f9fa',
+                altBkgColor: '#f0f4ff',
+                critBkgColor: '#fff5f5',
+                doneBkgColor: '#d1e7dd',
+                doneBorderColor: '#198754'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                diagramMarginX: 50,
+                diagramMarginY: 10,
+                actorMargin: 50,
+                width: 150,
+                height: 65,
+                boxMargin: 10,
+                boxTextMargin: 5,
+                noteMargin: 10,
+                messageMargin: 35,
+                mirrorActors: true,
+                bottomMarginAdj: 1,
+                useMaxWidth: true,
+                rightAngles: false,
+                showSequenceNumbers: false
+            }
+        });
+    </script>
+</body>
+</html>
+

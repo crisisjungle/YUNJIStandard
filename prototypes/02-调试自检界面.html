@@ -876,7 +876,7 @@
                 <!-- 检测项列表面板 -->
                 <div class="detection-panel">
                     <div class="panel-header">
-                        <h2>检测项目列表（点击查看子检测项）</h2>
+                        <h2>检测项目列表</h2>
                         <div class="panel-actions">
                             <button class="btn btn-secondary" onclick="stopDetection()">停止检测</button>
                             <button class="btn btn-primary" onclick="startDetection()">开始检测</button>
@@ -1409,12 +1409,78 @@
             }
         });
 
+        // 重置所有检测状态
+        function resetAllDetectionStatus() {
+            // 重置所有检测项状态
+            detectionItems.forEach(item => {
+                detectionStatus[item.id] = {
+                    status: 'pending',
+                    progress: 0,
+                    startTime: null,
+                    endTime: null,
+                    result: null
+                };
+                // 重置子检测项状态
+                if (item.subItems) {
+                    item.subItems.forEach(subItem => {
+                        subItemStatus[subItem.id] = {
+                            status: 'pending'
+                        };
+                        subItemErrors[subItem.id] = null;
+                    });
+                }
+            });
+
+            // 重置当前选中的检测项
+            currentDetection = null;
+
+            // 清空日志（保留初始日志）
+            logs = [];
+            const logContainer = document.getElementById('logContainer');
+            logContainer.innerHTML = `
+                <div class="log-entry">
+                    <span class="log-time">--:--:--</span>
+                    <span class="log-level info">[INFO]</span>
+                    <span class="log-message">等待开始检测...</span>
+                </div>
+            `;
+
+            // 更新UI
+            renderProgressDots();
+            renderDetectionList();
+            updateProgress();
+            
+            // 清空详情信息
+            const detailInfo = document.getElementById('detailInfo');
+            if (detailInfo) {
+                detailInfo.innerHTML = `
+                    <div class="info-row">
+                        <span class="info-label">检测项目</span>
+                        <span class="info-value">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">检测结果</span>
+                        <span class="info-value">-</span>
+                    </div>
+                `;
+            }
+
+            // 清空子检测项列表
+            const subItemsList = document.getElementById('subItemsList');
+            if (subItemsList) {
+                subItemsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #7f8c8d; font-size: 14px;">请选择一个检测项目查看子检测项</div>';
+            }
+        }
+
         // 开始检测
         async function startDetection() {
             if (isRunning) {
                 alert('检测正在进行中，请等待完成');
                 return;
             }
+
+            // 重置所有检测状态
+            resetAllDetectionStatus();
 
             isRunning = true;
             addLog('info', '开始系统调试自检...');
@@ -1580,7 +1646,8 @@
                 alert('请先完成或停止检测');
                 return;
             }
-            alert('将跳转到监控界面...');
+            // 跳转到监控软件界面
+            window.location.href = '03-动环监控软件界面.html';
         }
 
         // 页面加载时初始化
